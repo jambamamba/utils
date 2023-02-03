@@ -7,8 +7,18 @@ include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
 # specify the C++ standard
-set(CMAKE_CXX_STANDARD 19)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+#################################################################
+#build non-cmake project cpython:
+include(ExternalProject)
+ExternalProject_Add(cpython
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cpython
+    CONFIGURE_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/cpython/configure --prefix=${CMAKE_BINARY_DIR}/utils/cpython-prefix --enable-shared --enable-profiling --enable-optimizations --enable-loadable-sqlite-extensions --enable-big-digits --with-trace-refs --disable-ipv6
+    BUILD_COMMAND ${MAKE})
+#for arm build, check cpython/build.sh
+#################################################################
 
 set(SOURCES
    debug_logger.h
@@ -24,8 +34,10 @@ set(SOURCES
 set (INC_DIRS
     ${PROJECT_SOURCE_DIR}
     ${THIRD_PARTY_LIB_DIR}/
-    ${CMAKE_CURRENT_SOURCE_DIR}/cpython/installs/Include
-    ${CMAKE_CURRENT_SOURCE_DIR}/cJSON/installs/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/cpython/Include
+    ${CMAKE_BINARY_DIR}/utils/cpython-prefix/src/cpython-build
+    ${CMAKE_CURRENT_SOURCE_DIR}/cJSON/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/cJSON
 )
 
 if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")

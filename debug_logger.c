@@ -39,9 +39,7 @@ __attribute__((destructor)) void debuglogger_finish()
 static char *debuglogger_file_name(char *logfile, size_t logfile_sz)
 {
     struct stat st = {0};
-    if (stat(STENO_DIR, &st) == -1) {
-        mkdir(STENO_DIR, 0700);
-    }
+    const char LOG_DIR[] = "/tmp";
     if (stat(LOG_DIR, &st) == -1) {
         mkdir(LOG_DIR, 0700);
     }    

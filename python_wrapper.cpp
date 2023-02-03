@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <filesystem>
 #include <debug_logger.h>
-#include <mq_utils.h>
+// #include <mq_utils.h>
 #include <sstream>
 #include <vector>
 
@@ -355,6 +355,8 @@ PythonWrapper::~PythonWrapper()
 
 bool PythonWrapper::pythonInit(int argc, char **argv)
 {
+    //osm todo
+    const char SERVICES_JSON[] = "/path/to/py/script/to/run";
     auto module_paths = getModulePathsFromJson(SERVICES_JSON);
     module_paths = appendModulePathOfScriptToRun(module_paths, argc, argv);
     _py_script_to_run = getPythonScriptToRun(argc, argv);
@@ -489,11 +491,12 @@ long PythonWrapper::pythonCallMain(std::function<void()> app_event_loop)
 
 bool PythonWrapper::eventLoop()
 {
+    bool ret = false;
     if(!_py_event_loop_callback ||
         _py_event_loop_callback->ob_refcnt <= 0){
         return true;//there is no python code to execute, just return true
     }
-
+#if 0
     ScreenLoaded *msg = ipc_recv_screen_loaded_message();
 
     PyObject *list = PyList_New(1);
@@ -520,6 +523,7 @@ bool PythonWrapper::eventLoop()
     Py_DECREF(dict);
     bool ret = PyBool_Check(ret_value) && ret_value == Py_True;
     Py_DECREF(ret_value);
+#endif//0
     return ret;
 }
 
