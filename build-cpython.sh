@@ -8,7 +8,6 @@ set -e
 #globals:
 PROJECT_DIR=$(pwd)/cpython
 SDK_DIR=/opt/usr_data/sdk
-SHA="$(sudo git config --global --add safe.directory $PROJECT_DIR;sudo git rev-parse --verify --short HEAD)"
 
 function parseArgs()
 {
@@ -21,7 +20,7 @@ function parseArgs()
 
 function pushBuildDir(){
 	local workdir=$(mktemp -d) # "/tmp/tmp.igmJjY0jrj"
-	sudo ln -sf $workdir workdir
+	ln -sf $workdir workdir
 	pushd $workdir
 }
 
@@ -53,7 +52,9 @@ function buildArm(){
 	parseArgs $@
 	mkdir -p arm-build
 	pushd arm-build
-	rm -fr *
+	if [ "$clean" == "true" ]; then
+		rm -fr *
+	fi
 
 	echo "ac_cv_file__dev_ptmx=no
 	ac_cv_file__dev_ptc=no
@@ -84,11 +85,13 @@ function buildArm(){
 	popd
 }
 
-function buildMsys(){ #use when crosscompiling for windows target on linux host
+function buildWin64(){ #use when crosscompiling for windows target on linux host, was not compiling last I left it
 	parseArgs $@
 	mkdir -p arm-build
 	pushd arm-build
-	rm -fr *
+	if [ "$clean" == "true" ]; then
+		rm -fr *
+	fi
 
 	echo "ac_cv_file__dev_ptmx=no
 	ac_cv_file__dev_ptc=no
@@ -159,6 +162,7 @@ function package(){
 	ln -sf libpython3.12.so.1.0 libpython3.12.so
 	popd
 
+	local SHA="$(sudo git config --global --add safe.directory $PROJECT_DIR;sudo git rev-parse --verify --short HEAD)"
 	tar -cvJf cpython.$SHA.tar.xz $workdir
 	
 	#rm -fr $workdir
@@ -182,8 +186,13 @@ function main(){
 	pushd cpython
 	pushBuildDir
 	buildX86
-	buildArm
-	#buildMsys #does not compile
+
+	if [ "$target" == "arm" ]; then
+		buildArm
+	fi
+	if [ "$target" == "win64" ]; then
+		buildWin64 #does not compile
+	fi
 	package
 	popBuildDir
 	popd

@@ -15,12 +15,18 @@ option(USE_CPYTHON "Enable cpython" TRUE)
 #################################################################
 if (USE_CPYTHON)
 #build non-cmake project cpython:
-include(ExternalProject)
-ExternalProject_Add(cpython
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cpython
-    CONFIGURE_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/cpython/configure --prefix=${CMAKE_BINARY_DIR}/utils/cpython-prefix --enable-shared --enable-profiling --enable-optimizations --enable-loadable-sqlite-extensions --enable-big-digits --with-trace-refs --disable-ipv6
-    BUILD_COMMAND ${MAKE})
-#for arm build, check cpython/build.sh
+#include(ExternalProject)
+#ExternalProject_Add(cpython
+#    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cpython
+#    CONFIGURE_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/cpython/configure --prefix=${CMAKE_BINARY_DIR}/utils/cpython-prefix --enable-shared --enable-profiling --enable-optimizations --enable-loadable-sqlite-extensions --enable-big-digits --with-trace-refs --disable-ipv6
+#    BUILD_COMMAND ${MAKE}
+#    BUILD_COMMAND "/bin/bash -c ./build-cpython.sh target=x86"
+#)
+
+add_custom_command(OUTPUT /tmp/build-cpython.log
+                   COMMAND "/bin/bash -c ./build-cpython.sh target=x86"
+                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cpython
+)
 endif(USE_CPYTHON)
 #################################################################
 
