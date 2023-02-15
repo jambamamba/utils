@@ -9,7 +9,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#ifndef WIN32
 #include <sys/syscall.h>
+#endif
 #include <time.h>
 #include <unistd.h>
 
@@ -36,12 +38,25 @@ __attribute__((destructor)) void debuglogger_finish()
     pthread_join(_worker_thread_id, NULL);
 }
 
+static int getThreadId()
+{
+#ifdef WIN32
+    return 0;
+#else
+    return syscall(SYS_gettid);
+#endif
+}
 static char *debuglogger_file_name(char *logfile, size_t logfile_sz)
 {
     struct stat st = {0};
     const char LOG_DIR[] = "/tmp";
     if (stat(LOG_DIR, &st) == -1) {
-        mkdir(LOG_DIR, 0700);
+        mkdir(LOG_DIR
+#ifndef WIN32
+        , 0700
+#endif
+        );
+
     }    
     size_t nbytes = snprintf(logfile, 0, "%s%s.log", LOG_DIR, __progname) + 1;
     if (nbytes < logfile_sz) {
@@ -159,9 +174,18 @@ static pthread_mutex_t _access_lock;
 
 int debuglogger_category(const char *category_name)
 {
+#ifdef WIN32
+    static bool initialized = false;
+    if(!initialized) {
+        initialized = true;
+        pthread_mutex_init(&_access_lock, 0);
+    }
+#else
     if(!_access_lock.__data.__lock){
         pthread_mutex_init(&_access_lock, 0);
     }
+#endif
+
     int category_id = 0;
     pthread_mutex_lock(&_access_lock);
     // std::scoped_lock lock(_access_lock);
@@ -236,7 +260,7 @@ void debuglogger_log(int/*DebugLogLevelU*/ level, int category_id, const char* f
     debuglogger_category_name(category_id),
     file,
     line_num,
-    syscall(SYS_gettid)
+    getThreadId()
     );
   if (sz >= sizeof(_queue[0])){
     fprintf(stderr, "log line is too long at %i bytes, max line length limit is %i\n", sz, (int)sizeof(_queue[0])-1);
@@ -248,7 +272,7 @@ void debuglogger_log(int/*DebugLogLevelU*/ level, int category_id, const char* f
     debuglogger_category_name(category_id),
     file,
     line_num,
-    syscall(SYS_gettid)
+    getThreadId()
     );
   vsnprintf (buffer + strlen(buffer), sizeof(buffer) - strlen(buffer), format, args);
   va_end (args);

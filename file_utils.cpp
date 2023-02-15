@@ -36,35 +36,45 @@ void FileUtils::getFilesFromDirectory(const std::string& directory, std::vector<
     }
 }
 
-std::string FileUtils::getLastModifiedTime(const std::string& dictionaryName)
+std::string FileUtils::getLastModifiedTime(const std::string& file_name)
 {
     struct stat st;
-    stat(dictionaryName.c_str(), &st);
-    struct timespec mtime = st.st_mtim;
-
-    struct tm t;
-
-    char time[256];
-    strftime(time, 100, "%D %T", gmtime(&mtime.tv_sec));
-    return time;
+    char time[256] = {0};
+    stat(file_name.c_str(), &st);
+#ifdef WIN32
+    strftime(time, 100, "%D %T", gmtime(&st.st_mtime));
+#else
+    strftime(time, 100, "%D %T", gmtime(&st.st_mtim.tv_sec));
+#endif
+return time;
 }
 
-int FileUtils::getFileSize(const std::string& dictionary_name)
+int FileUtils::getFileSize(const std::string& file_name)
 {
     struct stat st;
-    stat(dictionary_name.c_str(), &st);
+    stat(file_name.c_str(), &st);
     size_t size = st.st_size;
 
     return (int)size;
 }
 
 std::string FileUtils::getBaseName(const std::string& fileFullPath) {
+#ifdef WIN32
+    LOG(FATAL, FILE_UTIL, "getBaseName not implemented");
+    return "";//not implemented
+#else
     return std::filesystem::path(fileFullPath).filename();
+#endif
 }
 
 
 std::string FileUtils::getDirName(const std::string& fileFullPath) {
+#ifdef WIN32
+    LOG(FATAL, FILE_UTIL, "getBaseName not implemented");
+    return "";//not implemented
+#else
     return std::filesystem::path(fileFullPath).parent_path();
+#endif
 }
 
 void FileUtils::makeDirectory(const std::string &directory)
@@ -72,7 +82,11 @@ void FileUtils::makeDirectory(const std::string &directory)
     struct stat st = {0};
     if (stat(directory.c_str(), &st) == -1) {
         std::filesystem::create_directories(directory);
-        mkdir(directory.c_str(), 0700);
+        mkdir(directory.c_str()
+#ifndef WIN32
+        , 0700
+#endif
+        );
     }
     // std::istringstream f(directory.c_str());
     // std::string s;    

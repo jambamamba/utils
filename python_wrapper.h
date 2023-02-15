@@ -12,7 +12,7 @@ class PythonWrapper
 public:
     explicit PythonWrapper();
     ~PythonWrapper();
-    bool pythonInit(int argc, char **argv);
+    bool pythonInit(int argc, char **argv, const char *py_script_to_run);
     long pythonCallMain(std::function<void()> event_loop);
     void onLoadScreenCallback(const char* screen_id);
     void registerTouchWidgetProcs(

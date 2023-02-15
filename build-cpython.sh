@@ -6,7 +6,7 @@ set -e
 #cd cpython
 
 #globals:
-PROJECT_DIR=$(pwd)
+PROJECT_DIR=$(pwd)/cpython
 SDK_DIR=/opt/usr_data/sdk
 SHA="$(sudo git config --global --add safe.directory $PROJECT_DIR;sudo git rev-parse --verify --short HEAD)"
 
@@ -20,7 +20,8 @@ function parseArgs()
 }
 
 function pushBuildDir(){
-	local workdir=$(mktemp -d) #"/tmp/tmp.VqPGhjq76t"
+	local workdir=$(mktemp -d) # "/tmp/tmp.igmJjY0jrj"
+	sudo ln -sf $workdir workdir
 	pushd $workdir
 }
 
@@ -35,7 +36,14 @@ function buildX86(){
 	if [ "$clean" == "true" ]; then
 		rm -fr *
 	fi
-	$PROJECT_DIR/configure --enable-shared --enable-profiling --enable-optimizations --enable-loadable-sqlite-extensions --enable-big-digits --with-trace-refs --disable-ipv6 
+	$PROJECT_DIR/configure \
+		--enable-shared \
+		--enable-profiling \
+		--enable-optimizations \
+		--enable-loadable-sqlite-extensions \
+		--enable-big-digits \
+		--with-trace-refs \
+		--disable-ipv6 
 	#--with-lto=full --enable-bolt --with-pydebug  
 	make -j
 	popd
@@ -60,9 +68,53 @@ function buildArm(){
 	#export CPPFLAGS="-O3"
 	#export LDFLAGS="-s"
 
-	$PROJECT_DIR/configure --enable-shared --enable-profiling --enable-optimizations --enable-loadable-sqlite-extensions --enable-big-digits --with-trace-refs --disable-ipv6 --with-build-python=../x86-build/python --host=aarch64-fslc-linux --build=x86_64-pc-linux-gnu
+	$PROJECT_DIR/configure \
+		--enable-shared \
+		--enable-profiling \
+		--enable-optimizations \
+		--enable-loadable-sqlite-extensions \
+		--enable-big-digits \
+		--with-trace-refs \
+		--disable-ipv6 \
+		--with-build-python=../x86-build/python \
+		--host=aarch64-fslc-linux \
+		--build=x86_64-pc-linux-gnu
 	VERBOSE=1 make -j
 
+	popd
+}
+
+function buildMsys(){ #use when crosscompiling for windows target on linux host
+	parseArgs $@
+	mkdir -p arm-build
+	pushd arm-build
+	rm -fr *
+
+	echo "ac_cv_file__dev_ptmx=no
+	ac_cv_file__dev_ptc=no
+	">config.site
+
+	source ../x86_64-w64-mingw32.sh
+	export CONFIG_SITE=./config.site
+	export PYTHONPATH=../Lib/site-packages
+	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../win64-build #:/opt/usr_data/sdk/sysroots/x86_64-fslcsdk-linux/lib/
+	export PYTHONPATH=../Lib/site-packages
+	#export CFLAGS="-O3"
+	#export CPPFLAGS="-O3"
+	#export LDFLAGS="-s"
+	LD_LIBRARY_PATH=../x86-build/ \
+	$PROJECT_DIR/configure \
+		--enable-shared \
+		--enable-profiling \
+		--enable-optimizations \
+		--enable-loadable-sqlite-extensions \
+		--enable-big-digits \
+		--with-trace-refs \
+		--disable-ipv6 \
+		--with-build-python=../x86-build/python \
+		--host=aarch64-fslc-linux \
+		--build=$PREFIX
+	VERBOSE=1 make -j
 	popd
 }
 
@@ -131,6 +183,7 @@ function main(){
 	pushBuildDir
 	buildX86
 	buildArm
+	#buildMsys #does not compile
 	package
 	popBuildDir
 	popd

@@ -10,7 +10,10 @@ include(CMakePackageConfigHelpers)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+option(USE_CPYTHON "Enable cpython" TRUE)
+
 #################################################################
+if (USE_CPYTHON)
 #build non-cmake project cpython:
 include(ExternalProject)
 ExternalProject_Add(cpython
@@ -18,6 +21,7 @@ ExternalProject_Add(cpython
     CONFIGURE_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/cpython/configure --prefix=${CMAKE_BINARY_DIR}/utils/cpython-prefix --enable-shared --enable-profiling --enable-optimizations --enable-loadable-sqlite-extensions --enable-big-digits --with-trace-refs --disable-ipv6
     BUILD_COMMAND ${MAKE})
 #for arm build, check cpython/build.sh
+endif(USE_CPYTHON)
 #################################################################
 
 set(SOURCES
@@ -27,13 +31,20 @@ set(SOURCES
    json_utils.c
    file_utils.h
    file_utils.cpp
-   python_wrapper.h
-   python_wrapper.cpp
 )
+
+if (USE_CPYTHON)
+set(SOURCES
+    ${SOURCES}
+    python_wrapper.h
+    python_wrapper.cpp
+    )
+endif(USE_CPYTHON)
 
 set (INC_DIRS
     ${PROJECT_SOURCE_DIR}
     ${THIRD_PARTY_LIB_DIR}/
+    ${CMAKE_SOURCE_DIR}/utils/cpython/PC
     ${CMAKE_CURRENT_SOURCE_DIR}/cpython/Include
     ${CMAKE_BINARY_DIR}/utils/cpython-prefix/src/cpython-build
     ${CMAKE_CURRENT_SOURCE_DIR}/cJSON/include

@@ -66,10 +66,14 @@ static std::vector<std::wstring> &appendModulePathOfScriptToRun(std::vector<std:
             LOG(WARNING, PY, "py_main was not found in args section of services.json, will skip loading python module\n");
             return module_paths;
         }
+#ifdef WIN32
+        LOG(FATAL, PY, "appendModulePathOfScriptToRun not implemented");
+#else
         std::string path(std::filesystem::path(py_main).parent_path());
         std::wstring wide_string = std::wstring(path.begin(), path.end());
         module_paths.emplace_back(wide_string.c_str());
         // _py_script_to_run = path.stem();
+#endif
     }
     return module_paths;
 }
@@ -83,7 +87,11 @@ static std::string getPythonScriptToRun(int argc, char **argv)
             LOG(WARNING, PY, "py_main was not found in args section of services.json, will skip loading python module\n");
             return "";
         }
+#ifdef WIN32
+        LOG(FATAL, PY, "getPythonScriptToRun not implemented");
+#else
         return std::filesystem::path(py_main).stem();
+#endif
     }
     return "";
 }
@@ -133,14 +141,14 @@ static PyObject* pyInitMyModule(void)
 }
 static std::string getStderrText()
 {
-    PyObject* stderr = PySys_GetObject("stderr"); // borrowed reference
+    PyObject* stderror = PySys_GetObject("stderr"); // borrowed reference
     PyObject *value = nullptr, *encoded = nullptr;
 
     std::string result;
     char* temp_result = nullptr;
     Py_ssize_t size = 0;
 
-    value =  PyObject_CallMethod(stderr,"getvalue", nullptr);
+    value =  PyObject_CallMethod(stderror,"getvalue", nullptr);
     if (!value) goto done;
     // ideally should get the preferred encoding
     encoded = PyUnicode_AsEncodedString(value, "utf-8", "strict");
@@ -353,11 +361,9 @@ PythonWrapper::~PythonWrapper()
 {
 }
 
-bool PythonWrapper::pythonInit(int argc, char **argv)
+bool PythonWrapper::pythonInit(int argc, char **argv, const char *py_script_to_run)
 {
-    //osm todo
-    const char SERVICES_JSON[] = "/path/to/py/script/to/run";
-    auto module_paths = getModulePathsFromJson(SERVICES_JSON);
+    auto module_paths = getModulePathsFromJson(py_script_to_run);
     module_paths = appendModulePathOfScriptToRun(module_paths, argc, argv);
     _py_script_to_run = getPythonScriptToRun(argc, argv);
     if(!_py_script_to_run.size()) {
@@ -476,7 +482,7 @@ long PythonWrapper::pythonCallMain(std::function<void()> app_event_loop)
 
    if(!_py_module || PyErr_Occurred()){
         PyErr_Print();
-        LOG(WARNING, PY, "%s\nFailed to load %s\n", getStderrText().c_str(), _py_script_to_run.c_str());
+        LOG(WARNING, PY, "%s\nFailed to load %s\n", getStderrText().substr(3).c_str(), _py_script_to_run.c_str());
        return false;
    }
     _app_event_loop = app_event_loop;
@@ -496,7 +502,7 @@ bool PythonWrapper::eventLoop()
         _py_event_loop_callback->ob_refcnt <= 0){
         return true;//there is no python code to execute, just return true
     }
-#if 0
+#if 0//osm
     ScreenLoaded *msg = ipc_recv_screen_loaded_message();
 
     PyObject *list = PyList_New(1);
