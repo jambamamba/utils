@@ -50,7 +50,7 @@ endif(USE_CPYTHON)
 set (INC_DIRS
     ${PROJECT_SOURCE_DIR}
     ${THIRD_PARTY_LIB_DIR}/
-    ${CMAKE_SOURCE_DIR}/utils/cpython/PC
+    # ${CMAKE_SOURCE_DIR}/utils/cpython/PC
     ${CMAKE_CURRENT_SOURCE_DIR}/cpython/Include
     ${CMAKE_BINARY_DIR}/utils/cpython-prefix/src/cpython-build
     ${CMAKE_CURRENT_SOURCE_DIR}/cJSON/include
