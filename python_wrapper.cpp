@@ -66,8 +66,8 @@ static std::vector<std::wstring> &appendModulePathOfScriptToRun(std::vector<std:
             LOG(WARNING, PY, "py_main was not found in args section of services.json, will skip loading python module\n");
             return module_paths;
         }
-#ifdef WIN32
-        LOG(FATAL, PY, "appendModulePathOfScriptToRun not implemented");
+#if defined(WIN32) || defined(MSYS)
+        LOG(FATAL, PY, "not implemented");
 #else
         std::string path(std::filesystem::path(py_main).parent_path());
         std::wstring wide_string = std::wstring(path.begin(), path.end());
@@ -87,8 +87,8 @@ static std::string getPythonScriptToRun(int argc, char **argv)
             LOG(WARNING, PY, "py_main was not found in args section of services.json, will skip loading python module\n");
             return "";
         }
-#ifdef WIN32
-        LOG(FATAL, PY, "getPythonScriptToRun not implemented");
+#if defined(WIN32) || defined(MSYS)
+        LOG(FATAL, PY, "not implemented");
 #else
         return std::filesystem::path(py_main).stem();
 #endif

@@ -12,6 +12,41 @@
 
 LOG_CATEGORY(FILE_UTIL, "FILE_UTIL")
 
+extern "C" {
+#if defined(WIN32) || defined(MSYS)
+char *__progname;
+#endif
+void setProgramName(const char* path_)
+{
+#if defined(WIN32) || defined(MSYS)
+  auto tokens = FileUtils::splitString(path_, '\\');
+  std::string progname = tokens.at(tokens.size() - 1);
+  tokens = FileUtils::splitString(progname.c_str(), '.');
+  __progname = strdup(tokens.at(0).c_str());
+#endif
+}
+} //extern "C"
+
+std::vector<std::string> FileUtils::splitString(const std::string& s, char seperator)
+{
+   std::vector<std::string> output;
+
+    std::string::size_type prev_pos = 0, pos = 0;
+
+    while((pos = s.find(seperator, pos)) != std::string::npos)
+    {
+        std::string substring( s.substr(prev_pos, pos-prev_pos) );
+
+        output.push_back(substring);
+
+        prev_pos = ++pos;
+    }
+
+    output.push_back(s.substr(prev_pos, pos-prev_pos)); // Last word
+
+    return output;
+}
+
 void FileUtils::getFilesFromDirectory(const std::string& directory, std::vector<std::string>& files)
 {
     DIR *d;
@@ -59,34 +94,44 @@ int FileUtils::getFileSize(const std::string& file_name)
 }
 
 std::string FileUtils::getBaseName(const std::string& fileFullPath) {
-#ifdef WIN32
-    LOG(FATAL, FILE_UTIL, "getBaseName not implemented");
+#if defined(WIN32) || defined(MSYS)
+    LOG(FATAL, FILE_UTIL, "not implemented");
     return "";//not implemented
 #else
     return std::filesystem::path(fileFullPath).filename();
 #endif
 }
 
-
 std::string FileUtils::getDirName(const std::string& fileFullPath) {
-#ifdef WIN32
-    LOG(FATAL, FILE_UTIL, "getBaseName not implemented");
+#if defined(WIN32) || defined(MSYS)
+    LOG(FATAL, FILE_UTIL, "not implemented");
     return "";//not implemented
 #else
     return std::filesystem::path(fileFullPath).parent_path();
 #endif
 }
 
+extern "C" {
+void makeDirectoryNonRecursive(const char* directory)
+{
+    mkdir(directory
+#if !defined(WIN32) && !defined(MSYS)
+    , 0700
+#endif
+    );
+}
+} //extern "C"
+
 void FileUtils::makeDirectory(const std::string &directory)
 {
     struct stat st = {0};
     if (stat(directory.c_str(), &st) == -1) {
+#if defined(WIN32) || defined(MSYS)
+        LOG(FATAL, FILE_UTIL, "not implemented");
+#else
         std::filesystem::create_directories(directory);
-        mkdir(directory.c_str()
-#ifndef WIN32
-        , 0700
-#endif
-        );
+#endif        
+        makeDirectoryNonRecursive(directory.c_str());
     }
     // std::istringstream f(directory.c_str());
     // std::string s;    
@@ -114,8 +159,13 @@ void FileUtils::deleteFile(const char *filepath)
 
 void FileUtils::deleteAllFiles(const char *dir_path)
 {
-    for (const auto& entry : std::filesystem::directory_iterator(dir_path)) 
+#if defined(WIN32) || defined(MSYS)
+    LOG(FATAL, FILE_UTIL, "not implemented");
+#else
+    for (const auto& entry : std::filesystem::directory_iterator(dir_path)) {
         std::filesystem::remove_all(entry.path());
+    }
+#endif        
 }
 
 std::string FileUtils::readFile(const char *path)
@@ -137,10 +187,14 @@ std::string FileUtils::readFile(const char *path)
 
 void FileUtils::copyFile(const char *src, const char *dst)
 {
+#if defined(WIN32) || defined(MSYS)
+    LOG(FATAL, FILE_UTIL, "not implemented");
+#else
     std::error_code ec;
     std::filesystem::copy_file(src, dst, 
         std::filesystem::copy_options::none,
         ec);
+#endif
 }
 
 bool FileUtils::createFile (const char *filename)

@@ -1,5 +1,5 @@
 ﻿cmake_minimum_required (VERSION 3.8)
-set (project "common")
+set (project "utils")
 project(${project} CXX)
 
 # make cache variables for install destinations
@@ -80,5 +80,8 @@ endif()
 add_library (${project} STATIC ${SOURCES})
 target_include_directories(${project} PUBLIC ${INC_DIRS})
 
+if(MSYS)
+target_compile_definitions(${project} PRIVATE MSYS)
+endif()
 
 
