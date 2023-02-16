@@ -97,7 +97,7 @@ function buildMingw(){ #use when crosscompiling for windows target on linux host
 	ac_cv_file__dev_ptc=no
 	">config.site
 
-	source ../x86_64-w64-mingw32.sh
+	source ../toolchains/x86_64-w64-mingw32.sh
 	export CONFIG_SITE=./config.site
 	export PYTHONPATH=../Lib/site-packages
 	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../mingw-build #:/opt/usr_data/sdk/sysroots/x86_64-fslcsdk-linux/lib/
