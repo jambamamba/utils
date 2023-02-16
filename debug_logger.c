@@ -1,4 +1,5 @@
 #include <debug_logger.h>
+#include <file_utils.h>
 
 #include <dirent.h> 
 #include <errno.h>
@@ -9,7 +10,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#ifndef WIN32
+
+#if defined(WIN32) || defined(MSYS)
+#include <windows.h>
+#else
 #include <sys/syscall.h>
 #endif
 #include <time.h>
@@ -31,7 +35,6 @@ static pthread_cond_t _queue_signal = PTHREAD_COND_INITIALIZER;
 
 extern char *__progname;
 
-
 __attribute__((destructor)) void debuglogger_finish() 
 {
     _die = true;
@@ -40,8 +43,8 @@ __attribute__((destructor)) void debuglogger_finish()
 
 static int getThreadId()
 {
-#ifdef WIN32
-    return 0;
+#if defined(WIN32) || defined(MSYS)
+    return GetCurrentThreadId();
 #else
     return syscall(SYS_gettid);
 #endif
@@ -49,19 +52,14 @@ static int getThreadId()
 static char *debuglogger_file_name(char *logfile, size_t logfile_sz)
 {
     struct stat st = {0};
-    const char LOG_DIR[] = "/tmp";
+    const char LOG_DIR[] = "c:/users/oosman"; //osm: should be configurable
     if (stat(LOG_DIR, &st) == -1) {
-        mkdir(LOG_DIR
-#ifndef WIN32
-        , 0700
-#endif
-        );
-
-    }    
-    size_t nbytes = snprintf(logfile, 0, "%s%s.log", LOG_DIR, __progname) + 1;
+        makeDirectoryNonRecursive(LOG_DIR);
+    }
+    size_t nbytes = strlen(LOG_DIR) + strlen("/") + strlen(__progname) + strlen(".log") + 1;//snprintf(logfile, 0, "%s/%s.log", LOG_DIR, __progname) + 1;
     if (nbytes < logfile_sz) {
         memset(logfile, 0, logfile_sz);
-        snprintf(logfile, nbytes, "%s%s.log", LOG_DIR, __progname);
+        snprintf(logfile, nbytes, "%s/%s.log", LOG_DIR, __progname);
     }
     else {
         printf("FATAL: log file name is too long\n");
@@ -134,7 +132,7 @@ static void *debuglogger_worker_thread(void * arg)
     const char * logfilename = debuglogger_file_name(logfile, sizeof(logfile));
     FILE* fp = fopen(logfilename, "wt");
     if(!fp){
-        fprintf(stdout, "FATAL Could not open log file %s, errno [%i] %s\n", logfilename, errno, strerror(errno));
+        fprintf(stdout, "FATAL Could not open log file '%s', errno [%i] %s\n", logfilename, errno, strerror(errno));
         abort();
     }
     static int queue_size = sizeof(_queue)/sizeof(_queue[0]);
@@ -174,7 +172,7 @@ static pthread_mutex_t _access_lock;
 
 int debuglogger_category(const char *category_name)
 {
-#ifdef WIN32
+#if defined(WIN32) || defined(MSYS)
     static bool initialized = false;
     if(!initialized) {
         initialized = true;
@@ -239,13 +237,13 @@ void debuglogger_log(int/*DebugLogLevelU*/ level, int category_id, const char* f
     strftime(time_stamp, sizeof(time_stamp),"%x-%I:%M:%S%p", info);
     int sz = snprintf(NULL, 0, "%s.%li", time_stamp, currentTimeMillis());
     if(sz >= sizeof(time_stamp)){
-        fprintf(stderr, "time_stamp line is too long at %i bytes, max line length limit is %i\n", sz, (int)sizeof(time_stamp)-1);
+        fprintf(stdout, "time_stamp line is too long at %i bytes, max line length limit is %i\n", sz, (int)sizeof(time_stamp)-1);
         abort();
     }
     snprintf(time_stamp, sizeof(time_stamp), "%s.%li", time_stamp, currentTimeMillis());
     
     if(level < DebugLogLevel_DEBUG || level > DebugLogLevel_FATAL) {
-        fprintf(stderr, "invalid log level was used\n");
+        fprintf(stdout, "invalid log level was used\n");
         abort();
     }
     static const char* LogLevels[DebugLogLevel_NumLevels] = {"DEBUG", "INFO", "WARNING", "FATAL"};
@@ -263,7 +261,7 @@ void debuglogger_log(int/*DebugLogLevelU*/ level, int category_id, const char* f
     getThreadId()
     );
   if (sz >= sizeof(_queue[0])){
-    fprintf(stderr, "log line is too long at %i bytes, max line length limit is %i\n", sz, (int)sizeof(_queue[0])-1);
+    fprintf(stdout, "log line is too long at %i bytes, max line length limit is %i\n", sz, (int)sizeof(_queue[0])-1);
     abort();
   }
   snprintf(buffer, sizeof(_queue[0]), "[%s] [%s:%s] [%s:%i:%li] ",
