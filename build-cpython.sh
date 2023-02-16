@@ -85,7 +85,7 @@ function buildArm(){
 	popd
 }
 
-function buildWin64(){ #use when crosscompiling for windows target on linux host, was not compiling last I left it
+function buildMingw(){ #use when crosscompiling for windows target on linux host, was not compiling last I left it
 	parseArgs $@
 	mkdir -p arm-build
 	pushd arm-build
@@ -100,7 +100,7 @@ function buildWin64(){ #use when crosscompiling for windows target on linux host
 	source ../x86_64-w64-mingw32.sh
 	export CONFIG_SITE=./config.site
 	export PYTHONPATH=../Lib/site-packages
-	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../win64-build #:/opt/usr_data/sdk/sysroots/x86_64-fslcsdk-linux/lib/
+	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../mingw-build #:/opt/usr_data/sdk/sysroots/x86_64-fslcsdk-linux/lib/
 	export PYTHONPATH=../Lib/site-packages
 	#export CFLAGS="-O3"
 	#export CPPFLAGS="-O3"
@@ -190,8 +190,8 @@ function main(){
 	if [ "$target" == "arm" ]; then
 		buildArm
 	fi
-	if [ "$target" == "win64" ]; then
-		buildWin64 #does not compile
+	if [ "$target" == "mingw" ]; then
+		buildMingw #does not compile
 	fi
 	package
 	popBuildDir
