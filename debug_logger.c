@@ -52,7 +52,12 @@ static int getThreadId()
 static char *debuglogger_file_name(char *logfile, size_t logfile_sz)
 {
     struct stat st = {0};
-    const char LOG_DIR[] = "c:/users/oosman"; //osm: should be configurable
+    const char LOG_DIR[] = 
+#if defined(WIN32) || defined(MSYS)
+        "c:/users/oosman"; //osm todo should be configurable
+#else
+        "/tmp";
+#endif
     if (stat(LOG_DIR, &st) == -1) {
         makeDirectoryNonRecursive(LOG_DIR);
     }
