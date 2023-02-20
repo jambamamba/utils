@@ -19,7 +19,11 @@ function parseArgs()
 }
 
 function pushBuildDir(){
-	local workdir=$(mktemp -d) # "/tmp/tmp.igmJjY0jrj"
+	mkdir -p build
+	pushd build
+	return
+
+	local workdir=$(mktemp -d) #
 	ln -sf $workdir workdir
 	pushd $workdir
 }
@@ -86,9 +90,10 @@ function buildArm(){
 }
 
 function buildMingw(){ #use when crosscompiling for windows target on linux host, was not compiling last I left it
+	local toolchain
 	parseArgs $@
-	mkdir -p arm-build
-	pushd arm-build
+	mkdir -p mingw-build
+	pushd mingw-build
 	if [ "$clean" == "true" ]; then
 		rm -fr *
 	fi
@@ -97,7 +102,7 @@ function buildMingw(){ #use when crosscompiling for windows target on linux host
 	ac_cv_file__dev_ptc=no
 	">config.site
 
-	source ../toolchains/x86_64-w64-mingw32.sh
+	source $toolchain
 	export CONFIG_SITE=./config.site
 	export PYTHONPATH=../Lib/site-packages
 	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../mingw-build #:/opt/usr_data/sdk/sysroots/x86_64-fslcsdk-linux/lib/
@@ -107,16 +112,21 @@ function buildMingw(){ #use when crosscompiling for windows target on linux host
 	#export LDFLAGS="-s"
 	LD_LIBRARY_PATH=../x86-build/ \
 	$PROJECT_DIR/configure \
-		--enable-shared \
-		--enable-profiling \
-		--enable-optimizations \
-		--enable-loadable-sqlite-extensions \
-		--enable-big-digits \
-		--with-trace-refs \
-		--disable-ipv6 \
+		LDFLAGS="-Wl,--no-export-dynamic -static-libgcc -static $EXTRALIBS" \
+		CFLAGS="-DMS_WIN32 -DMS_WINDOWS -DHAVE_USABLE_WCHAR_T" \
+		CPPFLAGS="-static" \
+		LINKFORSHARED=" " \
+		LIBOBJS="import_nt.o dl_nt.o getpathp.o" \
+		THREADOBJ="Python/thread.o" \
+		DYNLOADFILE="dynload_win.o" \
+		--disable-shared \
 		--with-build-python=../x86-build/python \
-		--host=aarch64-fslc-linux \
-		--build=$PREFIX
+		--build=x86_64-w64-mingw32 \
+		--host=x86_64-w64-mingw32
+		
+
+#--build=$PREFIX
+#--build=x86_64-w64-mingw32
 	VERBOSE=1 make -j
 	popd
 }
@@ -183,17 +193,18 @@ function package(){
 
 function main(){
 	parseArgs $@
+	local toolchain="$(pwd)/../toolchains/x86_64-w64-mingw32.sh"
 	pushd cpython
 	pushBuildDir
 	buildX86
 
 	if [ "$target" == "arm" ]; then
-		buildArm
+		buildArm toolchain="$toolchain" 
 	fi
 	if [ "$target" == "mingw" ]; then
-		buildMingw #does not compile
+		buildMingw toolchain="$toolchain" #does not compile
 	fi
-	package
+#	package
 	popBuildDir
 	popd
 }
