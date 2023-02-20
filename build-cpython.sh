@@ -119,11 +119,12 @@ function buildMingw(){ #use when crosscompiling for windows target on linux host
 		LIBOBJS="import_nt.o dl_nt.o getpathp.o" \
 		THREADOBJ="Python/thread.o" \
 		DYNLOADFILE="dynload_win.o" \
+		MACHDEP="mingw64_nt-10.03"
 		--disable-shared \
 		--with-build-python=../x86-build/python \
 		--build=x86_64-w64-mingw32 \
 		--host=x86_64-w64-mingw32
-		
+
 
 #--build=$PREFIX
 #--build=x86_64-w64-mingw32
@@ -196,7 +197,7 @@ function main(){
 	local toolchain="$(pwd)/../toolchains/x86_64-w64-mingw32.sh"
 	pushd cpython
 	pushBuildDir
-	buildX86
+	# buildX86
 
 	if [ "$target" == "arm" ]; then
 		buildArm toolchain="$toolchain" 
