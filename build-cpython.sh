@@ -52,26 +52,6 @@ function buildX86(){
 	popd
 }
 
-function buildMsys(){
-	parseArgs $@
-	mkdir -p msys-build
-	pushd msys-build
-	if [ "$clean" == "true" ]; then
-		rm -fr *
-	fi
-	export CFLAGS="-DMS_WIN32 -DMS_WINDOWS -DHAVE_USABLE_WCHAR_T -static -Wno-error"
-	$PROJECT_DIR/configure \
-		LDFLAGS="-Wl,--no-export-dynamic -static-libgcc -static $EXTRALIBS" \
-		CFLAGS="-DMS_WIN32 -DMS_WINDOWS -DHAVE_USABLE_WCHAR_T -static -Wno-error" \
-		CPPFLAGS="-static  -Wno-error" \
-		LINKFORSHARED=" " \
-		LIBOBJS="import_nt.o dl_nt.o getpathp.o" \
-		THREADOBJ="Python/thread.o" \
-		DYNLOADFILE="dynload_win.o"
-	make -j
-	popd
-}
-
 function buildArm(){
 	parseArgs $@
 	mkdir -p arm-build
@@ -106,49 +86,6 @@ function buildArm(){
 		--build=x86_64-pc-linux-gnu
 	VERBOSE=1 make -j
 
-	popd
-}
-
-function buildMingw(){ #use when crosscompiling for windows target on linux host, was not compiling last I left it
-	local toolchain
-	parseArgs $@
-	mkdir -p mingw-build
-	pushd mingw-build
-	if [ "$clean" == "true" ]; then
-		rm -fr *
-	fi
-
-	echo "ac_cv_file__dev_ptmx=no
-	ac_cv_file__dev_ptc=no
-	">config.site
-
-	source $toolchain
-	export CONFIG_SITE=./config.site
-	export PYTHONPATH=../Lib/site-packages
-	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../mingw-build #:/opt/usr_data/sdk/sysroots/x86_64-fslcsdk-linux/lib/
-	export PYTHONPATH=../Lib/site-packages
-	#export CFLAGS="-O3"
-	#export CPPFLAGS="-O3"
-	#export LDFLAGS="-s"
-	LD_LIBRARY_PATH=../x86-build/ \
-	$PROJECT_DIR/configure \
-		LDFLAGS="-Wl,--no-export-dynamic -static-libgcc -static $EXTRALIBS" \
-		CFLAGS="-DMS_WIN32 -DMS_WINDOWS -DHAVE_USABLE_WCHAR_T" \
-		CPPFLAGS="-static" \
-		LINKFORSHARED=" " \
-		LIBOBJS="import_nt.o dl_nt.o getpathp.o" \
-		THREADOBJ="Python/thread.o" \
-		DYNLOADFILE="dynload_win.o" \
-		MACHDEP="mingw64_nt-10.03"
-		--disable-shared \
-		--with-build-python=../x86-build/python \
-		--build=x86_64-w64-mingw32 \
-		--host=x86_64-w64-mingw32
-
-
-#--build=$PREFIX
-#--build=x86_64-w64-mingw32
-	VERBOSE=1 make -j
 	popd
 }
 
@@ -220,18 +157,11 @@ function main(){
 	if [ "$target" == "x86" ]; then
 		buildX86
 	fi
-	if [ "$target" == "msys" ]; then
-		buildMsys
-	fi
 	if [ "$target" == "arm" ]; then
 		buildX86
 		buildArm toolchain="$toolchain" 
 	fi
-	if [ "$target" == "mingw" ]; then
-		buildX86
-		buildMingw toolchain="$toolchain" #does not compile
-	fi
-#	package
+	package
 	popBuildDir
 	popd
 }
