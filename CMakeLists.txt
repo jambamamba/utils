@@ -10,10 +10,7 @@ include(CMakePackageConfigHelpers)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-option(USE_CPYTHON "Enable cpython" TRUE)
-
 #################################################################
-if (USE_CPYTHON)
 #build non-cmake project cpython:
 #include(ExternalProject)
 #ExternalProject_Add(cpython
@@ -22,12 +19,10 @@ if (USE_CPYTHON)
 #    BUILD_COMMAND ${MAKE}
 #    BUILD_COMMAND "/bin/bash -c ./build-cpython.sh target=x86"
 #)
-
 add_custom_command(OUTPUT /tmp/build-cpython.log
                    COMMAND "/bin/bash -c ./build-cpython.sh target=x86"
                    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cpython
 )
-endif(USE_CPYTHON)
 #################################################################
 
 set(SOURCES
@@ -37,22 +32,16 @@ set(SOURCES
    json_utils.c
    file_utils.h
    file_utils.cpp
+   python_wrapper.h
+   python_wrapper.cpp
 )
-
-if (USE_CPYTHON)
-set(SOURCES
-    ${SOURCES}
-    python_wrapper.h
-    python_wrapper.cpp
-    )
-endif(USE_CPYTHON)
 
 set (INC_DIRS
     ${PROJECT_SOURCE_DIR}
     ${THIRD_PARTY_LIB_DIR}/
-    # ${CMAKE_SOURCE_DIR}/utils/cpython/PC
-    ${CMAKE_CURRENT_SOURCE_DIR}/cpython/Include
-    ${CMAKE_BINARY_DIR}/utils/cpython-prefix/src/cpython-build
+    ${CMAKE_CURRENT_SOURCE_DIR}/python311/include
+#    ${CMAKE_CURRENT_SOURCE_DIR}/cpython/Include
+#    ${CMAKE_BINARY_DIR}/utils/cpython-prefix/src/cpython-build
     ${CMAKE_CURRENT_SOURCE_DIR}/cJSON/include
     ${CMAKE_CURRENT_SOURCE_DIR}/cJSON
 )

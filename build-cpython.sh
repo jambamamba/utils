@@ -6,7 +6,7 @@ set -e
 #cd cpython
 
 #globals:
-PROJECT_DIR=$(pwd)/cpython
+PROJECT_DIR=$(pwd)/cpython-mingw
 SDK_DIR=/opt/usr_data/sdk
 
 function parseArgs()
@@ -48,6 +48,26 @@ function buildX86(){
 		--with-trace-refs \
 		--disable-ipv6 
 	#--with-lto=full --enable-bolt --with-pydebug  
+	make -j
+	popd
+}
+
+function buildMsys(){
+	parseArgs $@
+	mkdir -p msys-build
+	pushd msys-build
+	if [ "$clean" == "true" ]; then
+		rm -fr *
+	fi
+	export CFLAGS="-DMS_WIN32 -DMS_WINDOWS -DHAVE_USABLE_WCHAR_T -static -Wno-error"
+	$PROJECT_DIR/configure \
+		LDFLAGS="-Wl,--no-export-dynamic -static-libgcc -static $EXTRALIBS" \
+		CFLAGS="-DMS_WIN32 -DMS_WINDOWS -DHAVE_USABLE_WCHAR_T -static -Wno-error" \
+		CPPFLAGS="-static  -Wno-error" \
+		LINKFORSHARED=" " \
+		LIBOBJS="import_nt.o dl_nt.o getpathp.o" \
+		THREADOBJ="Python/thread.o" \
+		DYNLOADFILE="dynload_win.o"
 	make -j
 	popd
 }
@@ -195,14 +215,20 @@ function package(){
 function main(){
 	parseArgs $@
 	local toolchain="$(pwd)/../toolchains/x86_64-w64-mingw32.sh"
-	pushd cpython
+	pushd $PROJECT_DIR
 	pushBuildDir
-	# buildX86
-
+	if [ "$target" == "x86" ]; then
+		buildX86
+	fi
+	if [ "$target" == "msys" ]; then
+		buildMsys
+	fi
 	if [ "$target" == "arm" ]; then
+		buildX86
 		buildArm toolchain="$toolchain" 
 	fi
 	if [ "$target" == "mingw" ]; then
+		buildX86
 		buildMingw toolchain="$toolchain" #does not compile
 	fi
 #	package
