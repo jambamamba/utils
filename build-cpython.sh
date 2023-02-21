@@ -151,6 +151,12 @@ function package(){
 
 function main(){
 	parseArgs $@
+
+	if [ "$MSYSTEM" != "" ]; then
+		echo "Does not build cpython on Windows msys"
+		exit -1
+	fi
+
 	local toolchain="$(pwd)/../toolchains/x86_64-w64-mingw32.sh"
 	pushd $PROJECT_DIR
 	pushBuildDir
