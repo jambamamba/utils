@@ -6,7 +6,7 @@ set -e
 #cd cpython
 
 #globals:
-PROJECT_DIR=$(pwd)/cpython-mingw
+PROJECT_DIR=$(pwd)/cpython
 SDK_DIR=/opt/usr_data/sdk
 
 function parseArgs()

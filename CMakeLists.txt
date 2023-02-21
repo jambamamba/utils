@@ -10,19 +10,20 @@ include(CMakePackageConfigHelpers)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+if (CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
 #################################################################
 #build non-cmake project cpython:
-#include(ExternalProject)
-#ExternalProject_Add(cpython
-#    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cpython
-#    CONFIGURE_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/cpython/configure --prefix=${CMAKE_BINARY_DIR}/utils/cpython-prefix --enable-shared --enable-profiling --enable-optimizations --enable-loadable-sqlite-extensions --enable-big-digits --with-trace-refs --disable-ipv6
-#    BUILD_COMMAND ${MAKE}
-#    BUILD_COMMAND "/bin/bash -c ./build-cpython.sh target=x86"
-#)
-add_custom_command(OUTPUT /tmp/build-cpython.log
-                   COMMAND "/bin/bash -c ./build-cpython.sh target=x86"
-                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cpython
+include(ExternalProject)
+ExternalProject_Add(cpython
+   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cpython
+   CONFIGURE_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/cpython/configure --prefix=${CMAKE_BINARY_DIR}/utils/cpython-prefix --enable-shared --enable-profiling --enable-optimizations --enable-loadable-sqlite-extensions --enable-big-digits --with-trace-refs --disable-ipv6
+   BUILD_COMMAND ${MAKE}
 )
+# add_custom_command(OUTPUT /tmp/build-cpython.log
+#                    COMMAND "/bin/bash -c ./build-cpython.sh target=x86"
+#                    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cpython
+# )
+endif()
 #################################################################
 
 set(SOURCES
@@ -39,9 +40,11 @@ set(SOURCES
 set (INC_DIRS
     ${PROJECT_SOURCE_DIR}
     ${THIRD_PARTY_LIB_DIR}/
-    ${CMAKE_CURRENT_SOURCE_DIR}/python311/include
-#    ${CMAKE_CURRENT_SOURCE_DIR}/cpython/Include
-#    ${CMAKE_BINARY_DIR}/utils/cpython-prefix/src/cpython-build
+    # ${CMAKE_CURRENT_SOURCE_DIR}/python311/include
+   ${CMAKE_CURRENT_SOURCE_DIR}/cpython/Include
+   ${CMAKE_CURRENT_BINARY_DIR}/cpython/build/x86-build
+#   ${CMAKE_CURRENT_SOURCE_DIR}/cpython/PC
+#    ${CMAKE_CURRENT_BINARY_DIR}/cpython-prefix/src/cpython-build
     ${CMAKE_CURRENT_SOURCE_DIR}/cJSON/include
     ${CMAKE_CURRENT_SOURCE_DIR}/cJSON
 )
