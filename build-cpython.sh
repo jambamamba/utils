@@ -105,6 +105,10 @@ function package(){
 	cp -r $PROJECT_DIR/Lib $workdir/
 
 	mkdir -p $workdir/arm-build
+	if [ ! -f arm-build/pyconfig.h ]; then
+		echo "Cannot package, missing arm-build"
+		return;
+	fi
 	cp arm-build/pyconfig.h $workdir/arm-build/
 	#cp arm-build/libpython3.12.a $workdir/arm-build/
 	find arm-build/Modules/ -name "*.so*" -exec cp {} $workdir/arm-build/ \;
@@ -153,11 +157,10 @@ function main(){
 	parseArgs $@
 
 	if [ "$MSYSTEM" != "" ]; then
-		echo "Does not build cpython on Windows msys"
+		echo "Does not build cpython on Windows msys or Linux mingw"
 		exit -1
 	fi
 
-	local toolchain="$(pwd)/../toolchains/x86_64-w64-mingw32.sh"
 	pushd $PROJECT_DIR
 	pushBuildDir
 	if [ "$target" == "x86" ]; then
@@ -165,7 +168,7 @@ function main(){
 	fi
 	if [ "$target" == "arm" ]; then
 		buildX86
-		buildArm toolchain="$toolchain" 
+		buildArm
 	fi
 	package
 	popBuildDir

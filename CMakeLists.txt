@@ -10,21 +10,30 @@ include(CMakePackageConfigHelpers)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-if (CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
-#################################################################
-#build non-cmake project cpython:
-include(ExternalProject)
-ExternalProject_Add(cpython
-   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cpython
-   CONFIGURE_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/cpython/configure --prefix=${CMAKE_BINARY_DIR}/utils/cpython-prefix --enable-shared --enable-profiling --enable-optimizations --enable-loadable-sqlite-extensions --enable-big-digits --with-trace-refs --disable-ipv6
-   BUILD_COMMAND ${MAKE}
-)
-# add_custom_command(OUTPUT /tmp/build-cpython.log
-#                    COMMAND "/bin/bash -c ./build-cpython.sh target=x86"
-#                    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cpython
-# )
+if(NOT MINGW)
+    add_custom_target(
+        cpython
+        COMMAND "./build-cpython.sh"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    )
 endif()
+
+# include(ExternalProject)
+# ExternalProject_Add(cJSON
+#     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cJSON
+#     BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/cJSON
+#     CMAKE_ARGS "-DBUILD_SHARED_LIBS=OFF"
+#     INSTALL_COMMAND cmake -E echo "Skipping install step."
+# )
+SET(BUILD_SHARED_LIBS OFF)
+set(ENABLE_CJSON_UTILS OFF)
+add_subdirectory(cJSON)
 #################################################################
+#SDK_DIR="$SDK_DIR" cmake -DCMAKE_BUILD_TYPE=Release CMAKE_SYSTEM_PROCESSOR="x86_64" -DBUILD_SHARED_LIBS=OFF  -GNinja ${PROJECT_DIR}
+
+#source $SDK_DIR/environment-setup-aarch64-fslc-linux
+#SDK_DIR=$SDK_DIR cmake -DCMAKE_BUILD_TYPE=Release CMAKE_SYSTEM_PROCESSOR="aarch64" -DBUILD_SHARED_LIBS=OFF -GNinja ${PROJECT_DIR}
+
 
 set(SOURCES
    debug_logger.h
@@ -40,14 +49,19 @@ set(SOURCES
 set (INC_DIRS
     ${PROJECT_SOURCE_DIR}
     ${THIRD_PARTY_LIB_DIR}/
-    # ${CMAKE_CURRENT_SOURCE_DIR}/python311/include
-   ${CMAKE_CURRENT_SOURCE_DIR}/cpython/Include
-   ${CMAKE_CURRENT_BINARY_DIR}/cpython/build/x86-build
-#   ${CMAKE_CURRENT_SOURCE_DIR}/cpython/PC
-#    ${CMAKE_CURRENT_BINARY_DIR}/cpython-prefix/src/cpython-build
     ${CMAKE_CURRENT_SOURCE_DIR}/cJSON/include
     ${CMAKE_CURRENT_SOURCE_DIR}/cJSON
 )
+if (MINGW)
+    set (INC_DIRS ${INC_DIRS} 
+        ${CMAKE_CURRENT_SOURCE_DIR}/python311/include
+    )
+else()
+    set (INC_DIRS ${INC_DIRS}
+        ${CMAKE_CURRENT_SOURCE_DIR}/cpython/build/x86-build
+        ${CMAKE_CURRENT_SOURCE_DIR}/cpython/build/installs/Include
+    )
+endif()
 
 if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
     set (INC_DIRS 
@@ -56,24 +70,25 @@ if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
     )
     set(LINK_DIRECTORIES
         ${LINK_DIRECTORIES}
-        ${CMAKE_SOURCE_DIR}/extlibs/cJSON/installs/arm-build
+        ${CMAKE_SOURCE_DIR}/arm-build/utils/cJSON
     )
 else()
-    set (INC_DIRS 
-        ${INC_DIRS}
-        ${CMAKE_SOURCE_DIR}/extlibs/cpython/installs/x86-build
-    )
+    if(NOT MINGW)
+        set (INC_DIRS 
+            ${INC_DIRS}
+            ${CMAKE_SOURCE_DIR}/extlibs/cpython/installs/x86-build
+        )
+    endif()
     set(LINK_DIRECTORIES
         ${LINK_DIRECTORIES}
-        ${CMAKE_SOURCE_DIR}/extlibs/cJSON/installs/x86-build
+        ${CMAKE_SOURCE_DIR}/x86-build/utils/cJSON
     )
 endif()
 
 add_library (${project} STATIC ${SOURCES})
 target_include_directories(${project} PUBLIC ${INC_DIRS})
-
-if(MSYS)
-target_compile_definitions(${project} PRIVATE MSYS)
+if(NOT MINGW)
+    add_dependencies(${project} cpython)
 endif()
-
-
+target_link_directories(${project} PRIVATE ${LINK_DIRECTORIES})
+target_link_libraries(${project} cjson)
