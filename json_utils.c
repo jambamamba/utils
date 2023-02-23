@@ -196,11 +196,10 @@ cJSON* read_json(const char* data_json_file)
         data_json = cJSON_Parse(data_json_string);
         free(data_json_string);
     } else {
-        LOG(WARNING, JSON, "Could not found saved dictionary priority");
+        LOG(WARNING, JSON, "Could not find json file\n");
     }
 
     if (data_json == NULL){
-
         const char *error_ptr = cJSON_GetErrorPtr();
         
         if (error_ptr != NULL){

@@ -170,7 +170,8 @@ function main(){
 		buildX86
 		buildArm
 	fi
-	package
+	#todo: this takes too long:
+	#package
 	popBuildDir
 	popd
 }

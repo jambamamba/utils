@@ -130,9 +130,10 @@ static bool queueIsEmpty(bool lock){
     }
     return ret;
 }
+
 static void *debuglogger_worker_thread(void * arg)
 {
-    pthread_setname_np(pthread_self(), "steno-logger");
+    pthread_setname_np(pthread_self(), "app-logger");
     char logfile[1024] = {0};
     const char * logfilename = debuglogger_file_name(logfile, sizeof(logfile));
     FILE* fp = fopen(logfilename, "wt");
