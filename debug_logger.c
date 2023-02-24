@@ -32,10 +32,14 @@ static int _queue_insert_idx;
 static int _queue_remove_idx;
 static pthread_mutex_t _queue_lock;
 static pthread_cond_t _queue_signal = PTHREAD_COND_INITIALIZER;
+static const char *_log_dir;
 
 extern char *__progname;
 
-__attribute__((destructor)) void debuglogger_finish() 
+__attribute__((constructor)) void debuglogger_ctor() 
+{
+}
+__attribute__((destructor)) void debuglogger_dtor() 
 {
     _die = true;
     pthread_join(_worker_thread_id, NULL);
@@ -49,22 +53,20 @@ static int getThreadId()
     return syscall(SYS_gettid);
 #endif
 }
+
 static char *debuglogger_file_name(char *logfile, size_t logfile_sz)
 {
-    struct stat st = {0};
-    const char LOG_DIR[] = 
-#if defined(WIN32) || defined(MSYS)
-        "c:/users/oosman"; //osm todo should be configurable
-#else
-        "/tmp";
-#endif
-    if (stat(LOG_DIR, &st) == -1) {
-        makeDirectoryNonRecursive(LOG_DIR);
+    if(!_log_dir){
+        debuglogger_set_log_dir("/tmp");
     }
-    size_t nbytes = strlen(LOG_DIR) + strlen("/") + strlen(__progname) + strlen(".log") + 1;//snprintf(logfile, 0, "%s/%s.log", LOG_DIR, __progname) + 1;
+    struct stat st = {0};
+    if (stat(_log_dir, &st) == -1) {
+        makeDirectoryNonRecursive(_log_dir);
+    }
+    size_t nbytes = strlen(_log_dir) + strlen("/") + strlen(__progname) + strlen(".log") + 1;//snprintf(logfile, 0, "%s/%s.log", _log_dir, __progname) + 1;
     if (nbytes < logfile_sz) {
         memset(logfile, 0, logfile_sz);
-        snprintf(logfile, nbytes, "%s/%s.log", LOG_DIR, __progname);
+        snprintf(logfile, nbytes, "%s/%s.log", _log_dir, __progname);
     }
     else {
         printf("FATAL: log file name is too long\n");
@@ -175,6 +177,17 @@ static void *debuglogger_worker_thread(void * arg)
 }
 
 static pthread_mutex_t _access_lock;
+
+void debuglogger_set_log_dir(const char *path)
+{
+    pthread_mutex_lock(&_access_lock);
+    if(_log_dir) {
+        free(_log_dir);
+    }
+    _log_dir = strdup(path);
+    pthread_mutex_unlock(&_access_lock);
+    printf("@@@@@@@@@@@@@ _log_dir '%s' @@@@@@@@@@@@@@2\n", path);
+}
 
 int debuglogger_category(const char *category_name)
 {

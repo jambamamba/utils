@@ -8,7 +8,7 @@
 
 LOG_CATEGORY(JSON, "JSON")
 
-JsonNameValuePair *create_name_value_pairs_from_json_array(const char *json_array_string)
+JsonNameValuePair *nameValuePairsFromJsonArray(const char *json_array_string)
 {
     JsonNameValuePair *pairs = NULL;
     if(json_array_string && *json_array_string) {
@@ -32,7 +32,7 @@ JsonNameValuePair *create_name_value_pairs_from_json_array(const char *json_arra
     }
     return pairs;
 }
-void free_name_value_pairs(JsonNameValuePair *pairs)
+void freeNameValuePairs(JsonNameValuePair *pairs)
 {
     if(!pairs) {
         return;
@@ -51,13 +51,13 @@ void free_name_value_pairs(JsonNameValuePair *pairs)
     }
     free((void *)pairs);
 }
-int num_name_value_pairs(JsonNameValuePair *pairs)
+int countNameValuePairs(JsonNameValuePair *pairs)
 {
     int num_pairs = 0;
     for(;pairs && pairs[num_pairs]._name; num_pairs++){}
     return num_pairs;
 }
-int int_from_json_array(const char *json_array, const char *token_name, int default_value, unsigned int max_range)
+int intFromJsonArray(const char *json_array, const char *token_name, int default_value, unsigned int max_range)
 {
     int value = default_value;
     if(json_array && *json_array && token_name && *token_name) {
@@ -66,7 +66,7 @@ int int_from_json_array(const char *json_array, const char *token_name, int defa
         cJSON_ArrayForEach(json_token, json) {
             cJSON *json_value = cJSON_GetObjectItemCaseSensitive(json_token, token_name);
             if(json_value) {
-                value = int_from_json_value(json_value, max_range);
+                value = intFromJsonValue(json_value, max_range);
                 break;
             }
         }
@@ -74,7 +74,7 @@ int int_from_json_array(const char *json_array, const char *token_name, int defa
     return value;
 }
 
-const char *string_from_json_array(const char *json_array, const char *token_name)
+const char *stringFromJsonArray(const char *json_array, const char *token_name)
 {
     if(json_array && *json_array && token_name && *token_name) {
         cJSON *json = cJSON_Parse(json_array);
@@ -89,19 +89,17 @@ const char *string_from_json_array(const char *json_array, const char *token_nam
     return NULL;
 }
 
-char *load_json_from_file(const char *const json_file)
+char *loadJsonFromFile(const char *const json_file)
 {
     FILE *fp = fopen(json_file, "rt");
-    if (!fp)
-    {
-        LOG(FATAL, JSON,  "Cannot find json file to load: '%s'\n", json_file);
+    if (!fp){
+        LOG(FATAL, JSON,  "Cannot find file to load: '%s'\n", json_file);
         return NULL;
     }
     fseek(fp, 0, SEEK_END);
     int file_sz = ftell(fp);
     fseek(fp, 0, SEEK_SET);
-    if (file_sz <= 0)
-    {
+    if (file_sz <= 0){
         LOG(WARNING, JSON, "Invalid file size of '%i' for gui json file: '%s'\n", file_sz, json_file);
         return NULL;
     }
@@ -113,7 +111,7 @@ char *load_json_from_file(const char *const json_file)
     return json_string;
 }
 
-void store_json_to_file(char* json, const char* file)
+void storeJsonToFile(char* json, const char* file)
 {
     LOG(DEBUG, JSON,  "Storing data into json file : '%s'\n", file);
     FILE *fp = fopen(file, "wb");
@@ -130,7 +128,7 @@ void store_json_to_file(char* json, const char* file)
     free(json);
 }
 
-int int_from_json_value(const cJSON *json_value, unsigned int max_range)
+int intFromJsonValue(const cJSON *json_value, unsigned int max_range)
 {
     if(json_value) {
         if(cJSON_IsNumber(json_value)){
@@ -153,7 +151,7 @@ int int_from_json_value(const cJSON *json_value, unsigned int max_range)
     return max_range;
 }
 
-double double_from_json_value(const cJSON *json_value, double max_range)
+double doubleFromJsonValue(const cJSON *json_value, double max_range)
 {
     if(json_value) {
         if(cJSON_IsNumber(json_value)){
@@ -176,7 +174,7 @@ double double_from_json_value(const cJSON *json_value, double max_range)
     return max_range;
 }
 
-int color_from_json_value(const cJSON *json_value, int default_value)
+int colorFromJsonValue(const cJSON *json_value, int default_value)
 {
     if(json_value && 
         cJSON_IsString(json_value) &&
@@ -188,11 +186,11 @@ int color_from_json_value(const cJSON *json_value, int default_value)
     return default_value;
 }
 
-cJSON* read_json(const char* data_json_file)
+cJSON* readJson(const char* data_json_file)
 {
     cJSON* data_json = NULL;
     if (access(data_json_file, F_OK) == 0) {
-        char *data_json_string = load_json_from_file(data_json_file);
+        char *data_json_string = loadJsonFromFile(data_json_file);
         data_json = cJSON_Parse(data_json_string);
         free(data_json_string);
     } else {

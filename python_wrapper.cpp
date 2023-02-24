@@ -31,7 +31,7 @@ static std::string trim(const char* str) {
 static std::vector<std::wstring> getModulePathsFromJson(const char *file_name)
 {
     std::vector<std::wstring> paths;
-    char *gui_json_string = load_json_from_file(file_name);
+    char *gui_json_string = loadJsonFromFile(file_name);
     if (!gui_json_string) {
         return paths;
     }
@@ -60,8 +60,8 @@ static std::vector<std::wstring> getModulePathsFromJson(const char *file_name)
 static std::vector<std::wstring> &appendModulePathOfScriptToRun(std::vector<std::wstring> &module_paths, int argc, char **argv)
 {
     if(argc > 1) {
-        // int update_hz = int_from_json_array(argv[1], "update_hz", 100, 0);
-        const char *py_main = string_from_json_array(argv[1], "py_main");
+        // int update_hz = intFromJsonArray(argv[1], "update_hz", 100, 0);
+        const char *py_main = stringFromJsonArray(argv[1], "py_main");
         if(!py_main){
             LOG(WARNING, PY, "py_main was not found in args section of services.json, will skip loading python module\n");
             return module_paths;
@@ -81,8 +81,8 @@ static std::vector<std::wstring> &appendModulePathOfScriptToRun(std::vector<std:
 static std::string getPythonScriptToRun(int argc, char **argv)
 {
     if(argc > 1) {
-        // int update_hz = int_from_json_array(argv[1], "update_hz", 100, 0);
-        const char *py_main = string_from_json_array(argv[1], "py_main");
+        // int update_hz = intFromJsonArray(argv[1], "update_hz", 100, 0);
+        const char *py_main = stringFromJsonArray(argv[1], "py_main");
         if(!py_main){
             LOG(WARNING, PY, "py_main was not found in args section of services.json, will skip loading python module\n");
             return "";

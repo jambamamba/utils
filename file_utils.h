@@ -12,26 +12,38 @@
 #include <string.h>
 #include <vector>
 
+#include "debug_logger.h"
+
 extern "C" void setProgramName(const char* path_);
-class FileUtils
+namespace FileUtils
 {
-public:
-    static std::vector<std::string> splitString(const std::string& s, char seperator);
-    static void getFilesFromDirectory(const std::string& directory, std::vector<std::string>& files);
-    static std::string getLastModifiedTime(const std::string& file);
-    static int getFileSize(const std::string& file);
-    static std::string getBaseName(const std::string& fileFullPath);
-    static std::string getDirName(const std::string& fileFullPath);
-    static void makeDirectory(const std::string& directory);
-    static bool fileExists (const char *filename);
-    static bool folderExists (const char *filename);
-    static void deleteAllFiles(const char *dir_path);
-    static void deleteFile(const char *filepath);
-    static std::string readFile(const char *path);
-    static void copyFile(const char *src, const char *dst);
-    static bool createFile (const char *filename);
-};
+    std::vector<std::string> splitString(const std::string& s, char seperator);
+    void getFilesFromDirectory(const std::string& directory, std::vector<std::string>& files);
+    std::string getLastModifiedTime(const std::string& file);
+    int getFileSize(const std::string& file);
+    std::string getBaseName(const std::string& fileFullPath);
+    std::string getDirName(const std::string& fileFullPath);
+    void makeDirectory(const std::string& directory);
+    bool fileExists (const std::string &filename);
+    bool fileExists (const char *filename);
+    bool folderExists (const std::string &dirname);
+    bool folderExists (const char *dirname);
+    void deleteAllFiles(const char *dir_path);
+    void deleteFile(const char *filepath);
+    std::string readFile(const char *path);
+    void copyFile(const char *src, const char *dst);
+    bool createFile (const char *filename);
+    std::string getProgramName();
+    std::string getProgramPath();
+    std::string getProgramPathName();
+    std::string &&toLinuxPathSeparators(std::string &&path);
+}
 
 #ifdef __cplusplus
 #endif//0
 #endif //__cplusplus
+
+#define PROGRAM_INIT(path, workdir) \
+    setProgramName(path); \
+    debuglogger_set_log_dir(workdir);
+    

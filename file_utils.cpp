@@ -12,20 +12,68 @@
 
 LOG_CATEGORY(FILE_UTIL, "FILE_UTIL")
 
+#if defined(WIN32) || defined(MSYS)
+    static const char path_separator = '\\';
+#else
+    static const char path_separator = '/';
+#endif
+
 extern "C" {
 #if defined(WIN32) || defined(MSYS)
-char *__progname;
+char *__progname; //already defined on Linux platforms, missing on Windows
 #endif
+static char *_exe_name;
+static char *_exe_path;
+static char *_exe_path_name;
+
 void setProgramName(const char* path_)
 {
-#if defined(WIN32) || defined(MSYS)
-  auto tokens = FileUtils::splitString(path_, '\\');
+  _exe_path_name = strdup(path_);
+  auto tokens = FileUtils::splitString(path_, path_separator);
   std::string progname = tokens.at(tokens.size() - 1);
+
+  std::string path;
+  for(int i = 1; i < tokens.size() - 1; ++i){
+    path.push_back(path_separator);
+    path.append(tokens.at(i));
+  }
+  _exe_path = strdup(path.c_str());
+
   tokens = FileUtils::splitString(progname.c_str(), '.');
-  __progname = strdup(tokens.at(0).c_str());
+  if(tokens.size() > 0){
+    progname = tokens.at(0).c_str();
+  }
+  _exe_name = strdup(progname.c_str());
+#if defined(WIN32) || defined(MSYS)
+  __progname = _exe_name;
 #endif
 }
 } //extern "C"
+
+std::string FileUtils::getProgramName()
+{
+    return _exe_name;
+}
+
+std::string FileUtils::getProgramPath()
+{
+    return _exe_path;
+}
+
+std::string FileUtils::getProgramPathName()
+{
+    return _exe_path_name;
+}
+
+std::string &&FileUtils::toLinuxPathSeparators(std::string &&path)
+{
+  for(int i = 0; i < path.size(); ++i){
+    if(path[i] == '\\'){
+      path[i] = '/';
+    }
+  }
+  return std::move(path);
+}
 
 std::vector<std::string> FileUtils::splitString(const std::string& s, char seperator)
 {
@@ -146,10 +194,20 @@ bool FileUtils::fileExists (const char *filename)
   return (stat (filename, &buffer) == 0);
 }
 
-bool FileUtils::folderExists (const char *filename) 
+bool FileUtils::fileExists (const std::string &filename) 
+{
+  return fileExists(filename.c_str());
+}
+
+bool FileUtils::folderExists (const char *dirname) 
 {
   struct stat   buffer;   
-  return (stat (filename, &buffer) == 0);
+  return (stat (dirname, &buffer) == 0);
+}
+
+bool FileUtils::folderExists (const std::string &dirname) 
+{
+    return folderExists(dirname.c_str());
 }
 
 void FileUtils::deleteFile(const char *filepath)
