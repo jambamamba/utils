@@ -28,6 +28,10 @@ endif()
 SET(BUILD_SHARED_LIBS OFF)
 set(ENABLE_CJSON_UTILS OFF)
 add_subdirectory(cJSON)
+
+set(CURL_ZLIB OFF)
+set(BUILD_SHARED_LIBS OFF)
+add_subdirectory(curl)
 #################################################################
 #SDK_DIR="$SDK_DIR" cmake -DCMAKE_BUILD_TYPE=Release CMAKE_SYSTEM_PROCESSOR="x86_64" -DBUILD_SHARED_LIBS=OFF  -GNinja ${PROJECT_DIR}
 
@@ -91,4 +95,4 @@ if(NOT MINGW)
     add_dependencies(${project} cpython)
 endif()
 target_link_directories(${project} PRIVATE ${LINK_DIRECTORIES})
-target_link_libraries(${project} cjson)
+target_link_libraries(${project} cjson libcurl)
