@@ -10,14 +10,15 @@
 
 class CurlHelper {
     struct CurlContext {
-        CurlContext(std::function<bool (long curl_result, long http_status_code, ssize_t bytes_written, ssize_t content_length)> 
+        CurlContext(std::function<bool (long curl_result, long http_status_code, ssize_t bytes_written, ssize_t content_length, const std::string &errmsg)> 
             progressfn = nullptr);
         ~CurlContext();
         bool loadFromJson(const cJSON* json);
         long httpStatusCode() const;
+        std::string errorToString() const;
 
 
-        CURLcode _res = (CURLcode) CURLM_UNKNOWN_OPTION;
+        CURLcode _code = (CURLcode) CURLM_UNKNOWN_OPTION;
         CURL *_handle = nullptr;
         char *_memory = nullptr;
         size_t _size = 0;
@@ -33,9 +34,11 @@ class CurlHelper {
         ssize_t _content_length = -1;
         ssize_t _total_bytes_written = 0;
         bool _resume_broken_download = true;
+        bool _verify_peer = true;
+        bool _verify_host = true;
         std::string _basic_auth_username;
         std::string _basic_auth_password;
-        std::function<bool (long curl_result, long http_status_code, size_t bytes_written, size_t content_length)> _progressfn = nullptr;
+        std::function<bool (long curl_result, long http_status_code, size_t bytes_written, size_t content_length, const std::string &errmsg)> _progressfn = nullptr;
     };
 
     static size_t writeHeader(void *data, size_t size, size_t nmemb, void *stream);
@@ -49,6 +52,6 @@ public:
     ~CurlHelper() = default;
 
     void startSession(std::function<
-        bool (long curl_result, long http_status_code, ssize_t bytes_written, ssize_t content_length)> 
+        bool (long curl_result, long http_status_code, ssize_t bytes_written, ssize_t content_length, const std::string &errmsg)> 
         progressfn = nullptr);
 };
