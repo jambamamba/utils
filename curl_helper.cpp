@@ -19,7 +19,7 @@ std::string cURLcodeToString(CURLcode code){
   case CURLE_URL_MALFORMAT: return "           /* 3 */";
   case CURLE_NOT_BUILT_IN: return "            /* 4 - [was obsoleted in August 2007 for 7.17.0, reused in April 2011 for 7.21.5] */";
   case CURLE_COULDNT_RESOLVE_PROXY: return "   /* 5 */";
-  case CURLE_COULDNT_RESOLVE_HOST: return "    /* 6 */";
+  case CURLE_COULDNT_RESOLVE_HOST: return "    /* 6 CURLE_COULDNT_RESOLVE_HOST */";
   case CURLE_COULDNT_CONNECT: return "         /* 7 */";
   case CURLE_WEIRD_SERVER_REPLY: return "      /* 8 */";
   case CURLE_REMOTE_ACCESS_DENIED: return "    /* 9 a service was denied by the server due to lack of access - when login fails this is not returned. */";
