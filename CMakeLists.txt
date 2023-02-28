@@ -48,6 +48,8 @@ set(SOURCES
    file_utils.cpp
    python_wrapper.h
    python_wrapper.cpp
+   curl_helper.h
+   curl_helper.cpp
 )
 
 set (INC_DIRS
