@@ -35,7 +35,7 @@ std::string cURLcodeToString(CURLcode code){
   case CURLE_FTP_COULDNT_RETR_FILE: return "   /* 19 */";
   case CURLE_OBSOLETE20: return "              /* 20 - NOT USED */";
   case CURLE_QUOTE_ERROR: return "             /* 21 - quote command failure */";
-  case CURLE_HTTP_RETURNED_ERROR: return "     /* 22 */";
+  case CURLE_HTTP_RETURNED_ERROR: return "     /* 22 */ CURLE_HTTP_RETURNED_ERROR";
   case CURLE_WRITE_ERROR: return "             /* 23 */";
   case CURLE_OBSOLETE24: return "              /* 24 - NOT USED */";
   case CURLE_UPLOAD_FAILED: return "           /* 25 - failed upload 'command' */";
