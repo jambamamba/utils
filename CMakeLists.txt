@@ -65,13 +65,19 @@ set(SOURCES
    python_wrapper.cpp
    curl_helper.h
    curl_helper.cpp
+   ssh_session.h
+   ssh_session.cpp
+   scp_session.h
+   scp_session.cpp
 )
 
 set (INC_DIRS
-    ${PROJECT_SOURCE_DIR}
+    ${PROJECT_SOURCE_DIR}/
     ${THIRD_PARTY_LIB_DIR}/
-    ${CMAKE_CURRENT_SOURCE_DIR}/cJSON/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/cJSON/include/
     ${CMAKE_CURRENT_SOURCE_DIR}/curl/include/
+    ${CMAKE_CURRENT_SOURCE_DIR}/libssh/include/
+    ${CMAKE_CURRENT_BINARY_DIR}/libssh/include/
     ${CMAKE_CURRENT_SOURCE_DIR}/cJSON
 )
 if (MINGW)
