@@ -7,3 +7,6 @@
 [submodule "curl"]
 	path = curl
 	url = https://github.com/curl/curl.git
+[submodule "libssh"]
+	path = libssh
+	url = https://git.libssh.org/projects/libssh.git

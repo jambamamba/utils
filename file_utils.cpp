@@ -32,12 +32,11 @@ void setProgramName(const char* path_)
   auto tokens = FileUtils::splitString(path_, path_separator);
   std::string progname = tokens.at(tokens.size() - 1);
 
-  std::string path;
-  for(int i = 1; i < tokens.size() - 1; ++i){
-    path.push_back(path_separator);
-    path.append(tokens.at(i));
+  _exe_path = strdup(path_);
+  char *last_path_sep = strrchr(_exe_path, path_separator);
+  if(last_path_sep){
+    *last_path_sep = '\0';
   }
-  _exe_path = strdup(path.c_str());
 
   tokens = FileUtils::splitString(progname.c_str(), '.');
   if(tokens.size() > 0){

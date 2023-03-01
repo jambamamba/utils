@@ -29,8 +29,22 @@ SET(BUILD_SHARED_LIBS OFF)
 set(ENABLE_CJSON_UTILS OFF)
 add_subdirectory(cJSON)
 
-set(CURL_ZLIB OFF)
+set(BUILD_STATIC_LIB OFF)
+set(BUILD_SHARED_LIBS ON)
+if (MINGW)
+   add_subdirectory(libssh)
+else()
+   add_subdirectory(libssh)
+endif()
+
 set(BUILD_SHARED_LIBS OFF)
+set(USE_LIBSSH2 OFF)
+set(CURL_USE_LIBSSH ON)
+set(CURL_ENABLE_EXPORT_TARGET OFF)
+set(CURL_USE_OPENSSL ON)
+set(CURL_ENABLE_SSL ON)
+set(BUILD_TESTING OFF)
+add_compile_definitions(DEBUGBUILD="ON")
 add_subdirectory(curl)
 #################################################################
 #SDK_DIR="$SDK_DIR" cmake -DCMAKE_BUILD_TYPE=Release CMAKE_SYSTEM_PROCESSOR="x86_64" -DBUILD_SHARED_LIBS=OFF  -GNinja ${PROJECT_DIR}
@@ -56,6 +70,7 @@ set (INC_DIRS
     ${PROJECT_SOURCE_DIR}
     ${THIRD_PARTY_LIB_DIR}/
     ${CMAKE_CURRENT_SOURCE_DIR}/cJSON/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/curl/include/
     ${CMAKE_CURRENT_SOURCE_DIR}/cJSON
 )
 if (MINGW)
@@ -98,3 +113,4 @@ if(NOT MINGW)
 endif()
 target_link_directories(${project} PRIVATE ${LINK_DIRECTORIES})
 target_link_libraries(${project} cjson libcurl)
+

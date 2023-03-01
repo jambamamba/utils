@@ -323,11 +323,15 @@ CurlHelper::startSession(std::function<
   }
 
   if (ctx._code != CURLE_OK){
-    LOG(WARNING, MAIN, "libcurl error:%i, HTTP status code:'%s'\n", ctx.httpStatusCode(), curl_easy_strerror(ctx._code)); // FAILed
+    LOG(WARNING, MAIN, "HTTP:%i, libcurl error:[%i] '%s'\n", 
+      ctx.httpStatusCode(), 
+      ctx._code, 
+      curl_easy_strerror(ctx._code)); // FAILed
   }
 
   if(ctx._progressfn){
-    ctx._progressfn(ctx._code, 
+    ctx._progressfn(
+        ctx._code, 
         ctx.httpStatusCode(),
         ctx._total_bytes_written, 
         ctx._content_length,
