@@ -44,6 +44,7 @@ set(CURL_ENABLE_EXPORT_TARGET OFF)
 set(CURL_USE_OPENSSL ON)
 set(CURL_ENABLE_SSL ON)
 set(BUILD_TESTING OFF)
+set(DEBUGBUILD ON)
 add_compile_definitions(DEBUGBUILD="ON")
 add_subdirectory(curl)
 #################################################################

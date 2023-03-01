@@ -275,6 +275,53 @@ CurlHelper::writeDataToFile(void *data, size_t size, size_t nmemb, void *stream)
   return bytes_written;
 }
 
+static int 
+curlProgress(void *clientp,
+                      double dltotal,
+                      double dlnow,
+                      double ultotal,
+                      double ulnow){
+  struct progress *memory = (struct progress *)clientp;
+  return 0;
+}
+
+static int 
+curlTracer(CURL *handle, curl_infotype type,
+             char *data, size_t size,
+             void *clientp){
+  const char *text;
+  (void)handle; /* prevent compiler warning */
+  (void)clientp;
+ 
+  switch (type) {
+  case CURLINFO_TEXT:
+    LOG(DEBUG, MAIN, "== Info: %s\n", data);
+    // fwrite(data, size, 1, stderr);
+  default: /* in case a new one is introduced to shock us */
+    return 0;
+ 
+  case CURLINFO_HEADER_OUT:
+    text = "=> Send header";
+    break;
+  case CURLINFO_DATA_OUT:
+    text = "=> Send data";
+    break;
+  case CURLINFO_SSL_DATA_OUT:
+    text = "=> Send SSL data";
+    break;
+  case CURLINFO_HEADER_IN:
+    text = "<= Recv header";
+    break;
+  case CURLINFO_DATA_IN:
+    text = "<= Recv data";
+    break;
+  case CURLINFO_SSL_DATA_IN:
+    text = "<= Recv SSL data";
+    break;
+  }
+  LOG(DEBUG, MAIN, "== Info: %s\n", text);
+  return 0;
+}
 void 
 CurlHelper::startSession(std::function<
     bool (long curl_result, long http_status_code, ssize_t bytes_written, ssize_t content_length, const std::string &errmsg)> progressfn){
@@ -318,6 +365,11 @@ CurlHelper::startSession(std::function<
     curl_easy_setopt(ctx._handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
     curl_easy_setopt(ctx._handle, CURLOPT_FAILONERROR, 1);
     
+    // ((struct Curl_easy*)(ctx._handle))->set.fprogress = 0;
+    // ((struct Curl_easy*)(ctx._handle))->set.fdebug = 0;
+    curl_easy_setopt(ctx._handle, CURLOPT_CONNECTTIMEOUT_MS, 3000);
+    curl_easy_setopt(ctx._handle, CURLOPT_PROGRESSFUNCTION, curlProgress);
+    curl_easy_setopt(ctx._handle, CURLOPT_DEBUGFUNCTION, curlTracer);
     ctx._code = curl_easy_perform(ctx._handle);
     LOG(DEBUG, MAIN, "Download finished\n");
   }
