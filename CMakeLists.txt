@@ -10,7 +10,13 @@ include(CMakePackageConfigHelpers)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-if(NOT MINGW)
+if(MINGW)
+    add_custom_target(
+        cpython
+        COMMAND "./downloaddeps.sh"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+else()
     add_custom_target(
         cpython
         COMMAND "./build-cpython.sh"
@@ -82,7 +88,7 @@ set (INC_DIRS
 )
 if (MINGW)
     set (INC_DIRS ${INC_DIRS} 
-        ${CMAKE_CURRENT_SOURCE_DIR}/python311/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/wpython/include
     )
 else()
     set (INC_DIRS ${INC_DIRS}

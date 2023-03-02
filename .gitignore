@@ -1,3 +1,7 @@
 build
-python311
-x86-build
+wpython
+
+.cache
+SDL2-2.26.3
+openssl-1.1.1t
+zlib-1.2.13
