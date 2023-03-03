@@ -10,3 +10,9 @@
 [submodule "libssh"]
 	path = libssh
 	url = https://git.libssh.org/projects/libssh.git
+[submodule "zlib"]
+	path = zlib
+	url = https://github.com/madler/zlib.git
+[submodule "openssl"]
+	path = openssl
+	url = https://github.com/openssl/openssl.git

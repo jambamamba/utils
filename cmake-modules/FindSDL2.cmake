@@ -1,0 +1,15 @@
+set(SDL_FOUND TRUE)
+if(MINGW)
+    set(SDL_ROOT_DIR "${CMAKE_SOURCE_DIR}/utils/SDL2-2.26.3/x86_64-w64-mingw32")
+    set(SDL_LIB_DIR "${SDL_ROOT_DIR}/bin")
+    set(SDL_LIBRARIES "${SDL_LIB_DIR}/SDL2.dll")
+    set(SDL_INCLUDE_DIR "${SDL_ROOT_DIR}/include")
+    set(SDL2_INCLUDE_DIRS "${SDL_INCLUDE_DIR}")
+else()
+    set(SDL_LIB_DIR "/usr/lib/x86_64-linux-gnu")
+    set(SDL_LIBRARIES "${SDL_LIB_DIR}/libSDL2-2.0.so.0.10.0")
+    set(SDL_INCLUDE_DIR "/usr/include/SDL")
+    set(SDL2_INCLUDE_DIRS "${SDL_INCLUDE_DIR}")
+endif()
+
+
