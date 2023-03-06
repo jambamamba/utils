@@ -365,6 +365,8 @@ CurlHelper::startSession(std::function<
     curl_easy_setopt(ctx._handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
     curl_easy_setopt(ctx._handle, CURLOPT_FAILONERROR, 1);
     
+    curl_easy_setopt(ctx._handle, CURLOPT_FOLLOWLOCATION, 1L); //follow redirection if we get HTTP 302
+
     // ((struct Curl_easy*)(ctx._handle))->set.fprogress = 0;
     // ((struct Curl_easy*)(ctx._handle))->set.fdebug = 0;
     curl_easy_setopt(ctx._handle, CURLOPT_CONNECTTIMEOUT_MS, 3000);
