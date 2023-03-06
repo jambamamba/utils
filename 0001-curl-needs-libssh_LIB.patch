@@ -1,0 +1,25 @@
+From 1caba13848a51f5c3a572fa7082faf6efa1116eb Mon Sep 17 00:00:00 2001
+From: oosman <oosman@foo.bar>
+Date: Mon, 6 Mar 2023 12:44:53 -0600
+Subject: [PATCH] wip
+
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b97704bfe..2b81fa40f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -773,7 +773,7 @@ if(NOT USE_LIBSSH2 AND CURL_USE_LIBSSH)
+   if(libssh_FOUND)
+     message(STATUS "Found libssh ${libssh_VERSION}")
+     # Use imported target for include and library paths.
+-    list(APPEND CURL_LIBS ssh)
++    list(APPEND CURL_LIBS ${libssh_LIB})
+     set(USE_LIBSSH ON)
+   endif()
+ endif()
+-- 
+2.34.1
+

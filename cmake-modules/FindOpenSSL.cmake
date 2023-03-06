@@ -60,3 +60,14 @@ if(NOT TARGET OpenSSL::Crypto)
     $<BUILD_INTERFACE:${OPENSSL_LIBRARY_DIR}/include>
   )
 endif()
+
+file(COPY 
+  ${CMAKE_SOURCE_DIR}/utils/openssl/include/openssl
+  DESTINATION 
+  ${CMAKE_BINARY_DIR}/utils/libssh/include/
+)
+file(COPY 
+  ${CMAKE_BINARY_DIR}/utils/openssl/include/openssl
+  DESTINATION 
+  ${CMAKE_BINARY_DIR}/utils/libssh/include/
+)

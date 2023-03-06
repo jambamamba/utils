@@ -18,24 +18,10 @@ function parseArgs()
    done
 }
 
-function pushBuildDir(){
-	mkdir -p build
-	pushd build
-	return
-
-	local workdir=$(mktemp -d) #
-	ln -sf $workdir workdir
-	pushd $workdir
-}
-
-function popBuildDir(){
-	popd
-}
-
 function buildX86(){
 	parseArgs $@
-	mkdir -p x86-build
-	pushd x86-build
+	mkdir -p "${builddir}"
+	pushd "${builddir}"
 	if [ "$clean" == "true" ]; then
 		rm -fr *
 	fi
@@ -54,8 +40,14 @@ function buildX86(){
 
 function buildArm(){
 	parseArgs $@
-	mkdir -p arm-build
-	pushd arm-build
+	mkdir -p "${builddir}"
+	pushd "${builddir}"
+
+	if [ ! -f ${SDK_DIR}/environment-setup-aarch64-fslc-linux ]; then
+	  echo "FAILED: cross compiler SDK not set, cannot continue"
+	  exit -1
+	fi
+
 	if [ "$clean" == "true" ]; then
 		rm -fr *
 	fi
@@ -154,6 +146,8 @@ function package(){
 }
 
 function main(){
+	local target="x86"
+	local builddir="${target}-build"
 	parseArgs $@
 
 	if [ "$MSYSTEM" != "" ]; then
@@ -162,17 +156,13 @@ function main(){
 	fi
 
 	pushd $PROJECT_DIR
-	pushBuildDir
 	if [ "$target" == "x86" ]; then
-		buildX86
+		buildX86 builddir="${builddir}"
+	elif [ "$target" == "arm" ]; then
+		buildX86 builddir="${builddir}/../x86-build"
+		buildArm builddir="${builddir}"
+		package
 	fi
-	if [ "$target" == "arm" ]; then
-		buildX86
-		buildArm
-	fi
-	#todo: this takes too long:
-	#package
-	popBuildDir
 	popd
 }
 

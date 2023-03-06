@@ -120,18 +120,21 @@ function buildOpenSSL(){
 function downloadSDL(){
     parseArgs $@
 
+    mkdir -p .cache
     if [ "$clean" == "true" ]; then
         rm -fr SDL2-2.26.3
+        rm -fr .cache/SDL2-2.26.3
     fi
 
     if [ -d "SDL2-2.26.3" ]; then 
         return
     fi
-    mkdir -p .cache
     pushd .cache
     if [ ! -f "SDL2-devel-2.26.3-mingw.tar.gz" ]; then
         wget https://github.com/libsdl-org/SDL/releases/download/release-2.26.3/SDL2-devel-2.26.3-mingw.tar.gz
         rm -fr SDL2-2.26.3
+    fi
+    if [ ! -d SDL2-2.26.3 ]; then
         tar xfz SDL2-devel-2.26.3-mingw.tar.gz
     fi
     popd
@@ -141,14 +144,15 @@ function downloadSDL(){
 function downloadPython(){
     parseArgs $@
 
+    mkdir -p .cache
     if [ "$clean" == "true" ]; then
         rm -fr wpython
+        rm -fr .cache/Python312
     fi
 
     if [ -d "wpython" ]; then
         return
     fi
-    mkdir -p .cache
     pushd .cache
     if [ ! -f "Python312.zip" ]; then
         #wget https://need-the-correct-url-here/Python312.zip
@@ -161,17 +165,27 @@ function downloadPython(){
     mv -f .cache/Python312 wpython
 }
 
+function applyCurlPatch(){
+    pushd curl
+    ln -sf ../0001-curl-needs-libssh_LIB.patch
+    git apply 0001-curl-needs-libssh_LIB.patch && true
+    rm -f 0001-curl-needs-libssh_LIB.patch
+    popd
+}
+
 function main(){
+    local target="x86"
+    local builddir="$(pwd)/${target}-build"
     parseArgs $@
-    if [ "$clean" == "true" ]; then
-        rm -fr .cache
-    fi
     if [ "$target" == "mingw" ]; then
         downloadSDL clean="$clean"
         downloadPython clean="$clean"
+    else
+        ./build-cpython.sh target="${target}" builddir="${builddir}"
     fi
     buildOpenSSL clean="$clean" builddir="${builddir}"
     # buildZlib clean="$clean"
+    applyCurlPatch
 }
 
 #sudo apt-get install -y mingw-w64 \
