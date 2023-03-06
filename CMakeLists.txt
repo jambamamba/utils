@@ -18,11 +18,11 @@ if(MINGW)
     #     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     # )
 else()
-    # add_custom_target(
-    #     cpython
-    #     COMMAND "./build-cpython.sh"
-    #     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    # )
+    add_custom_target(
+        cpython
+        COMMAND "./build-cpython.sh"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    )
 endif()
 
 # include(ExternalProject)
