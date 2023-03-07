@@ -1,0 +1,30 @@
+From cd9d4ee40ccd578702f960ee8ce094d81969ea3f Mon Sep 17 00:00:00 2001
+From: oosman <oosman@foo.bar>
+Date: Tue, 7 Mar 2023 21:28:01 +0100
+Subject: [PATCH] disable zlib test example
+
+---
+ CMakeLists.txt | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b412dc7..71dc448 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -194,6 +194,7 @@ endif()
+ # Example binaries
+ #============================================================================
+ 
++if(TEST_EXAMPLE)
+ add_executable(example test/example.c)
+ target_link_libraries(example zlib)
+ add_test(example example)
+@@ -211,3 +212,4 @@ if(HAVE_OFF64_T)
+     target_link_libraries(minigzip64 zlib)
+     set_target_properties(minigzip64 PROPERTIES COMPILE_FLAGS "-D_FILE_OFFSET_BITS=64")
+ endif()
++endif(TEST_EXAMPLE)
+\ No newline at end of file
+-- 
+2.25.1
+

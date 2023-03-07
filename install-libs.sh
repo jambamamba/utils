@@ -190,10 +190,20 @@ function applyCurlPatch(){
     popd
 }
 
+function applyZlibPatch(){
+    pushd zlib
+    ln -sf ../0001-disable-zlib-test-example.patch
+    git apply 0001-disable-zlib-test-example.patch && true
+    rm -f 0001-disable-zlib-test-example.patch
+    popd
+}
+
 function main(){
     local target="x86"
     local builddir="$(pwd)/${target}-build"
     parseArgs $@
+    applyCurlPatch
+    applyZlibPatch
     if [ "$target" == "mingw" ]; then
         downloadSDL clean="$clean"
     fi
@@ -202,7 +212,6 @@ function main(){
     # buildZlib clean="$clean"
     echo "@@@@@@@@@@@@@@@@@"
     pwd
-    applyCurlPatch
 }
 
 #sudo apt-get install -y mingw-w64 \
