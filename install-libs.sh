@@ -146,22 +146,20 @@ function downloadSDL(){
 function downloadPython(){
     parseArgs $@
 
-    mkdir -p "${builddir}"
-    pushd "${builddir}"
-    mkdir -p ".cache"
+    mkdir -p "${builddir}/.cache"
     if [ "$clean" == "true" ]; then
-        rm -fr cpython
+        rm -fr "${builddir}/cpython"
         if [ "${target}" == "mingw" ]; then
-            rm -fr .cache/Python312
+            rm -fr "${builddir}/.cache/Python312"
         elif [ "${target}" == "x86" ]; then
-            rm -fr .cache/cpython*.tar.xz
+            rm -fr "${builddir}/.cache/cpython*.tar.xz"
         fi
     fi
 
-    if [ -d "cpython" ]; then
+    if [ -d "${builddir}/cpython" ]; then
         return
     fi
-    pushd .cache
+    pushd "${builddir}/.cache"
     if [ "${target}" == "x86" ]; then
         if [ ! -f "cpython.36cb982b0b.tar.xz" ]; then
             cp ~/Downloads/cpython.36cb982b0b.tar.xz .
@@ -180,7 +178,6 @@ function downloadPython(){
         rm -fr "${builddir}/cpython"
         mv Python312 "${builddir}/cpython"
     fi
-    popd
     popd
     # rm -fr .cache
 }
@@ -203,6 +200,8 @@ function main(){
     downloadPython clean="$clean" builddir="${builddir}" target="${target}" 
     buildOpenSSL clean="$clean" builddir="${builddir}"
     # buildZlib clean="$clean"
+    echo "@@@@@@@@@@@@@@@@@"
+    pwd
     applyCurlPatch
 }
 
@@ -212,6 +211,6 @@ function main(){
     # mingw-w64-i686-dev \
     # mingw-w64-x86-64-dev
 
-# buildZlib $@
+#buildZlib $@
 main $@
 

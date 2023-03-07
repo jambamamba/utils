@@ -32,8 +32,17 @@ endif()
 #     CMAKE_ARGS "-DBUILD_SHARED_LIBS=OFF"
 #     INSTALL_COMMAND cmake -E echo "Skipping install step."
 # )
-set(BUILD_STATIC_LIB OFF)
+# set(BUILD_STATIC_LIB OFF)
 set(BUILD_SHARED_LIBS ON)
+
+# include(ExternalProject)
+# ExternalProject_Add(zlib
+#     SOURCE_DIR ${CMAKE_SOURCE_DIR}/utils/zlib
+#     BINARY_DIR ${CMAKE_BINARY_DIR}/utils/zlib
+#     CMAKE_ARGS "-DBUILD_SHARED_LIBS=ON`"
+#     INSTALL_COMMAND cmake -E echo "Skipping install step."
+#     BUILD_BYPRODUCTS ${CMAKE_BINARY_DIR}/utils/zlib/libzlib.so
+# )
 add_subdirectory(zlib)
 
 # include(ExternalProject)
