@@ -18,11 +18,11 @@ if(MINGW)
     #     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     # )
 else()
-    add_custom_target(
-        cpython
-        COMMAND "./build-cpython.sh"
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    )
+    # add_custom_target(
+    #     cpython
+    #     COMMAND "./build-cpython.sh"
+    #     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    # )
 endif()
 
 # include(ExternalProject)
@@ -230,17 +230,12 @@ set (INC_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/libssh/include/
     ${CMAKE_CURRENT_BINARY_DIR}/libssh/include/
     ${CMAKE_CURRENT_SOURCE_DIR}/cJSON
+    ${CMAKE_CURRENT_BINARY_DIR}/cpython/
+    ${CMAKE_CURRENT_BINARY_DIR}/cpython/include/
 )
-if (MINGW)
-    set (INC_DIRS ${INC_DIRS} 
-        ${CMAKE_CURRENT_SOURCE_DIR}/wpython/include
-    )
-else()
-    set (INC_DIRS ${INC_DIRS}
-        ${CMAKE_CURRENT_SOURCE_DIR}/cpython/build/x86-build
-        ${CMAKE_CURRENT_SOURCE_DIR}/cpython/build/installs/Include
-    )
-endif()
+set(LINK_DIRECTORIES
+    ${CMAKE_CURRENT_BINARY_DIR}/cpython/
+)
 
 if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
     set (INC_DIRS 
@@ -266,9 +261,9 @@ endif()
 
 add_library (${project} STATIC ${SOURCES})
 target_include_directories(${project} PUBLIC ${INC_DIRS})
-if(NOT MINGW)
-    add_dependencies(${project} cpython)
-endif()
+# if(NOT MINGW)
+#     add_dependencies(${project} cpython)
+# endif()
 target_link_directories(${project} PRIVATE ${LINK_DIRECTORIES})
 target_link_libraries(${project} 
     cjson 

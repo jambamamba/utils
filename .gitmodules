@@ -1,18 +1,15 @@
 [submodule "cJSON"]
-	path = cJSON
-	url = https://github.com/DaveGamble/cJSON.git
-[submodule "cpython"]
-	path = cpython
-	url = https://github.com/python/cpython.git
+path = cJSON
+url = https://github.com/DaveGamble/cJSON.git
 [submodule "curl"]
-	path = curl
-	url = https://github.com/curl/curl.git
+path = curl
+url = https://github.com/curl/curl.git
 [submodule "libssh"]
-	path = libssh
-	url = https://git.libssh.org/projects/libssh.git
+path = libssh
+url = https://git.libssh.org/projects/libssh.git
 [submodule "zlib"]
-	path = zlib
-	url = https://github.com/madler/zlib.git
+path = zlib
+url = https://github.com/madler/zlib.git
 [submodule "openssl"]
-	path = openssl
-	url = https://github.com/openssl/openssl.git
+path = openssl
+url = https://github.com/openssl/openssl.git

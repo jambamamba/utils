@@ -1,6 +1,6 @@
 build
-wpython
-
+.cache
 SDL2-2.26.3
 openssl
 zlib
+

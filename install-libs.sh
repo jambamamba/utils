@@ -88,8 +88,8 @@ function buildOpenSSL(){
         [ -f "${builddir}/openssl/libcrypto-1_1-x64.dll" ]; then 
         return
     elif [ "$target" == "x86" ] && \
-        [ -f "${builddir}/openssl/libssl.so.3" ] && \
-        [ -f "${builddir}/openssl/libcrypto.so.3" ]; then 
+        [ -f "${builddir}/openssl/libssl.so" ] && \
+        [ -f "${builddir}/openssl/libcrypto.so" ]; then 
         return
     fi
     # mkdir -p .cache
@@ -99,7 +99,9 @@ function buildOpenSSL(){
     # tar xfz openssl.tar.gz
     # popd
 
-    local srcdir="$(pwd)/openssl"
+    local script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+    local srcdir="${script_dir}/openssl"
+
     mkdir -p "${builddir}/openssl"
     pushd "${builddir}/openssl"
     #CROSS_COMPILE="x86_64-w64-mingw32-" \
@@ -144,25 +146,43 @@ function downloadSDL(){
 function downloadPython(){
     parseArgs $@
 
-    mkdir -p .cache
+    mkdir -p "${builddir}"
+    pushd "${builddir}"
+    mkdir -p ".cache"
     if [ "$clean" == "true" ]; then
-        rm -fr wpython
-        rm -fr .cache/Python312
+        rm -fr cpython
+        if [ "${target}" == "mingw" ]; then
+            rm -fr .cache/Python312
+        elif [ "${target}" == "x86" ]; then
+            rm -fr .cache/cpython*.tar.xz
+        fi
     fi
 
-    if [ -d "wpython" ]; then
+    if [ -d "cpython" ]; then
         return
     fi
     pushd .cache
-    if [ ! -f "Python312.zip" ]; then
-        #wget https://need-the-correct-url-here/Python312.zip
-        cp ~/Downloads/Python312.zip .
+    if [ "${target}" == "x86" ]; then
+        if [ ! -f "cpython.36cb982b0b.tar.xz" ]; then
+            cp ~/Downloads/cpython.36cb982b0b.tar.xz .
+        fi
+        tar xf cpython.36cb982b0b.tar.xz
+        rm -fr "${builddir}/cpython"
+        mv cpython "${builddir}/cpython"
+        mv -f "${builddir}/cpython/Include" "${builddir}/cpython/include"
+    elif [ "${target}" == "mingw" ]; then
+        if [ ! -f "Python312.zip" ]; then
+            #wget https://need-the-correct-url-here/Python312.zip
+            cp ~/Downloads/Python312.zip .
+        fi
+        rm -fr Python312
+        unzip Python312.zip
+        rm -fr "${builddir}/cpython"
+        mv Python312 "${builddir}/cpython"
     fi
-    rm -fr Python312
-    unzip Python312.zip
     popd
-
-    mv -f .cache/Python312 wpython
+    popd
+    # rm -fr .cache
 }
 
 function applyCurlPatch(){
@@ -179,10 +199,8 @@ function main(){
     parseArgs $@
     if [ "$target" == "mingw" ]; then
         downloadSDL clean="$clean"
-        downloadPython clean="$clean"
-    else
-        ./build-cpython.sh target="${target}" builddir="${builddir}"
     fi
+    downloadPython clean="$clean" builddir="${builddir}" target="${target}" 
     buildOpenSSL clean="$clean" builddir="${builddir}"
     # buildZlib clean="$clean"
     applyCurlPatch
