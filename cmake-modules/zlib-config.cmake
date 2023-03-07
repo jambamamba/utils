@@ -1,7 +1,7 @@
 set(ZLIB_FOUND TRUE)
 set(ZLIB_ROOT "${CMAKE_SOURCE_DIR}/utils/zlib")
 if(MINGW)
-  set(ZLIB_LIBRARY "${ZLIB_ROOT}/mingw-build/libzlib.dll")
+  set(ZLIB_LIBRARY "${CMAKE_BINARY_DIR}/utils/zlib/libzlib.dll")
 else()
   set(ZLIB_LIBRARY "${CMAKE_BINARY_DIR}/utils/zlib/libz.so.1.2.13")
 endif()
