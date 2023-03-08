@@ -143,6 +143,22 @@ function downloadSDL(){
     mv .cache/SDL2-2.26.3 .
 }
 
+function procureArtifact(){
+    local artifacts_url=""
+    local artifacts_file=""
+    parseArgs $@
+    local https=$(echo ${artifacts_url} | grep "^https://")
+    local localpath=$(echo ${artifacts_url} | grep "^/")
+    if [ "${https}" == "https://" ]; then
+        wget --no-check-certificate "${artifacts_url}/${artifacts_file}"
+    elif [ "${localpath}" == "/" ]; then
+        cp ${localpath}/${artifacts_file} .
+    else
+        echo "Dont know where to get artifact from! I quit."
+        exit -1
+    fi   
+}
+
 function downloadPython(){
     parseArgs $@
 
@@ -162,7 +178,7 @@ function downloadPython(){
     pushd "${builddir}/.cache"
     if [ "${target}" == "x86" ]; then
         if [ ! -f "cpython.36cb982b0b.tar.xz" ]; then
-            cp ~/Downloads/cpython.36cb982b0b.tar.xz .
+            procureArtifact artifacts_url="${artifacts_url}" artifacts_file="cpython.36cb982b0b.tar.xz"
         fi
         tar xf cpython.36cb982b0b.tar.xz
         rm -fr "${builddir}/cpython"
@@ -170,8 +186,7 @@ function downloadPython(){
         mv -f "${builddir}/cpython/Include" "${builddir}/cpython/include"
     elif [ "${target}" == "mingw" ]; then
         if [ ! -f "Python312.zip" ]; then
-            #wget https://need-the-correct-url-here/Python312.zip
-            cp ~/Downloads/Python312.zip .
+            procureArtifact artifacts_url="${artifacts_url}" artifacts_file="Python312.zip"
         fi
         rm -fr Python312
         unzip Python312.zip
@@ -207,10 +222,9 @@ function main(){
     if [ "$target" == "mingw" ]; then
         downloadSDL clean="$clean"
     fi
-    downloadPython clean="$clean" builddir="${builddir}" target="${target}" 
+    downloadPython clean="$clean" builddir="${builddir}" target="${target}" artifacts_url="${artifacts_url}"
     buildOpenSSL clean="$clean" builddir="${builddir}"
     # buildZlib clean="$clean"
-    echo "@@@@@@@@@@@@@@@@@"
     pwd
 }
 
