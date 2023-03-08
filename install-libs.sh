@@ -146,13 +146,11 @@ function downloadSDL(){
 function procureArtifact(){
     local artifacts_url=""
     local artifacts_file=""
-    parseArgs $@
-    local https=$(echo ${artifacts_url} | grep "^https://")
-    local localpath=$(echo ${artifacts_url} | grep "^/")
-    if [ "${https}" == "https://" ]; then
+    parseArgs $@    
+    if [ "${artifacts_url:0:8}" == "https://" ]; then
         wget --no-check-certificate "${artifacts_url}/${artifacts_file}"
-    elif [ "${localpath}" == "/" ]; then
-        cp ${localpath}/${artifacts_file} .
+    elif [ "${artifacts_url:0:1}" == "/" ]; then
+        cp ${artifacts_url}/${artifacts_file} .
     else
         echo "Dont know where to get artifact from! I quit."
         exit -1
