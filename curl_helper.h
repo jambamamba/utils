@@ -7,11 +7,10 @@
 #include <string>
 #include <map>
 
-
 class CurlHelper {
+    using CurlProgresCb = std::function<bool (long curl_result, long http_status_code, ssize_t bytes_written, ssize_t content_length, const std::string &errmsg)>;
     struct CurlContext {
-        CurlContext(std::function<bool (long curl_result, long http_status_code, ssize_t bytes_written, ssize_t content_length, const std::string &errmsg)> 
-            progressfn = nullptr);
+        CurlContext(CurlProgresCb progressfn = nullptr);
         ~CurlContext();
         bool loadFromJson(const cJSON* json);
         long httpStatusCode() const;
@@ -38,11 +37,12 @@ class CurlHelper {
         bool _verify_host = true;
         std::string _basic_auth_username;
         std::string _basic_auth_password;
-        std::function<bool (long curl_result, long http_status_code, size_t bytes_written, size_t content_length, const std::string &errmsg)> _progressfn = nullptr;
+        CurlProgresCb _progressfn = nullptr;
     };
 
     static size_t writeHeader(void *data, size_t size, size_t nmemb, void *stream);
     static size_t writeDataToFile(void *data, size_t size, size_t nmemb, void *stream);
+    float percentRemaining() const;
     void finish(CurlContext &ctx);
 
     const cJSON* _config = nullptr;
@@ -51,7 +51,5 @@ public:
     CurlHelper(const cJSON* json);
     ~CurlHelper() = default;
 
-    void startSession(std::function<
-        bool (long curl_result, long http_status_code, ssize_t bytes_written, ssize_t content_length, const std::string &errmsg)> 
-        progressfn = nullptr);
+    void startSession(CurlProgresCb progressfn = nullptr);
 };

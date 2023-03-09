@@ -13,3 +13,6 @@ url = https://github.com/madler/zlib.git
 [submodule "openssl"]
 path = openssl
 url = https://github.com/openssl/openssl.git
+[submodule "gzstream"]
+	path = gzstream
+	url = https://github.com/kanedo/gzstream.git

@@ -119,8 +119,7 @@ std::string cURLcodeToString(CURLcode code){
 }//namespace
 
 
-CurlHelper::CurlContext::CurlContext(std::function
-    <bool (long curl_result, long http_status_code, ssize_t bytes_written, ssize_t content_length, const std::string &errmsg)> progressfn)
+CurlHelper::CurlContext::CurlContext(CurlProgresCb progressfn)
     : _progressfn(progressfn)
 {}
 
@@ -194,7 +193,7 @@ size_t
 CurlHelper::writeHeader(void *data, size_t size, size_t nmemb, void *stream){
   CurlContext *ctx = (CurlContext *)stream;
   if (ctx->_progressfn && !ctx->_progressfn(ctx->_code, 
-    ctx->httpStatusCode(), 
+    ctx->httpStatusCode(),
     ctx->_total_bytes_written, 
     ctx->_content_length,
     ctx->errorToString())){
@@ -247,7 +246,7 @@ size_t
 CurlHelper::writeDataToFile(void *data, size_t size, size_t nmemb, void *stream){
   CurlContext *ctx = (CurlContext *)stream;
   if (ctx->_progressfn && !ctx->_progressfn(ctx->_code, 
-    ctx->httpStatusCode(), 
+    ctx->httpStatusCode(),
     ctx->_total_bytes_written, 
     ctx->_content_length,
     ctx->errorToString())){
@@ -266,7 +265,7 @@ CurlHelper::writeDataToFile(void *data, size_t size, size_t nmemb, void *stream)
     ctx->_content_length, 
     ctx->_content_length > 0 ? ctx->_total_bytes_written*100./ctx->_content_length : 0);
   if (ctx->_progressfn && !ctx->_progressfn(ctx->_code, 
-        ctx->httpStatusCode(), 
+        ctx->httpStatusCode(),
         ctx->_total_bytes_written, 
         ctx->_content_length,
         ctx->errorToString())){
@@ -323,8 +322,7 @@ curlTracer(CURL *handle, curl_infotype type,
   return 0;
 }
 void 
-CurlHelper::startSession(std::function<
-    bool (long curl_result, long http_status_code, ssize_t bytes_written, ssize_t content_length, const std::string &errmsg)> progressfn){
+CurlHelper::startSession(CurlProgresCb progressfn){
   curl_global_init(CURL_GLOBAL_ALL);
 
   CurlHelper::CurlContext ctx(progressfn);
