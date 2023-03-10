@@ -9,6 +9,9 @@
 #include <string>
 #include <fstream>
 #include <unistd.h>
+#ifdef USE_SDL
+#include <SDL2/SDL.h>
+#endif
 
 LOG_CATEGORY(FILE_UTIL, "FILE_UTIL")
 
@@ -260,4 +263,36 @@ bool FileUtils::createFile (const char *filename)
 
     return fileExists(filename);
 
+}
+
+std::string 
+FileUtils::configPath(const std::string &filename)
+{
+    std::string path;
+    
+#ifdef USE_SDL
+    path = SDL_GetPrefPath("", getProgramName().c_str());
+    if(path.size()){
+      LOG(DEBUG, FILE_UTIL, "configPath, 1-trying path %s\n", path.c_str());  
+      if(fileExists(std::string(path + filename))){
+        return toLinuxPathSeparators(path + filename);
+      }
+    }
+#endif
+
+    path = getProgramPath();
+    if(path.size()){
+      LOG(DEBUG, FILE_UTIL, "configPath, 2-trying path %s\n", (path + "/config.json").c_str());  
+      if(fileExists(path + "/config.json")){
+        return toLinuxPathSeparators(path + "/config.json");
+      }
+    }
+
+    LOG(DEBUG, FILE_UTIL, "configPath, 3-trying path %s\n", filename.c_str());  
+    if(fileExists(filename)){
+      return filename;
+    }
+
+    LOG(FATAL, FILE_UTIL, "configPath, exhausted all options\n");  
+    return "";
 }

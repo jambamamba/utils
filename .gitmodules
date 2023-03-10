@@ -16,3 +16,6 @@ url = https://github.com/openssl/openssl.git
 [submodule "gzstream"]
 	path = gzstream
 	url = https://github.com/kanedo/gzstream.git
+[submodule "lvgl-libraries"]
+	path = lvgl-libraries
+	url = git@github.com:jambamamba/lvgl-libraries.git

@@ -64,6 +64,8 @@ else()
 endif()
 #########################################################################
 
+add_subdirectory(lvgl-libraries)
+
 # include(ExternalProject)
 # ExternalProject_Add(openssl
 #     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/openssl
@@ -90,7 +92,7 @@ set(CURL_USE_OPENSSL ON)
 set(CURL_ENABLE_SSL ON)
 set(BUILD_TESTING OFF)
 set(DEBUGBUILD ON)
-add_compile_definitions(DEBUGBUILD="ON")
+add_compile_definitions(DEBUGBUILD="ON" )
 if(NOT MINGW)
 set(CURL_CA_BUNDLE "/etc/ssl/certs/ca-certificates.crt")
 set(CURL_CA_PATH "/etc/ssl/certs")
@@ -249,11 +251,28 @@ set(SOURCES
    ssh_session.cpp
    scp_session.h
    scp_session.cpp
+   json_gui_loader.h
+   json_gui_loader.cpp
+   language_translation.h
+   language_translation.cpp
+   simple_timer.h
+   simple_timer.cpp
+   ui/screen_manager.h
+   ui/screen_manager.cpp
+   ui/screen_button.h
+   ui/screen_button.cpp
+   ui/device_event_queue.h
+   ui/device_event_queue.cpp
+   ui/title_bar.h
+   ui/title_bar.cpp
+   ui/title_bar_icons.c
+
 )
 
 set (INC_DIRS
     ${PROJECT_SOURCE_DIR}/
     ${THIRD_PARTY_LIB_DIR}/
+    ${CMAKE_CURRENT_SOURCE_DIR}/lvgl-libraries/
     ${CMAKE_CURRENT_SOURCE_DIR}/cJSON/include/
     ${CMAKE_CURRENT_SOURCE_DIR}/curl/include/
     ${CMAKE_CURRENT_SOURCE_DIR}/libssh/include/
@@ -277,6 +296,11 @@ if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
     )
 else()
     if(NOT MINGW)
+        set (SOURCES
+            ${SOURCES}
+            file_change_notifier.h
+            file_change_notifier.cpp
+        )
         set (INC_DIRS 
             ${INC_DIRS}
             ${CMAKE_SOURCE_DIR}/extlibs/cpython/installs/x86-build
@@ -290,12 +314,22 @@ endif()
 
 add_library (${project} STATIC ${SOURCES})
 target_include_directories(${project} PUBLIC ${INC_DIRS})
-# if(NOT MINGW)
-#     add_dependencies(${project} cpython)
-# endif()
 target_link_directories(${project} PRIVATE ${LINK_DIRECTORIES})
-target_link_libraries(${project} 
+set(LIBS
     cjson 
     ssh
     libcurl
+    lvgl
 )
+if(USE_SDL)
+   find_package(SDL2 REQUIRED SDL2)
+   set(LIBS
+    ${LIBS}
+    SDL2::SDL2
+    )
+endif()
+target_link_libraries(${project} PUBLIC ${LIBS})
+
+if(MINGW)
+    add_compile_definitions(MINGW)
+endif()

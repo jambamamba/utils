@@ -37,6 +37,7 @@ namespace FileUtils
     std::string getProgramPath();
     std::string getProgramPathName();
     std::string &&toLinuxPathSeparators(std::string &&path);
+    std::string configPath(const std::string &filename);
 }
 
 #ifdef __cplusplus
