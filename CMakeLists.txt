@@ -44,24 +44,14 @@ set(BUILD_SHARED_LIBS ON)
 #     BUILD_BYPRODUCTS ${CMAKE_BINARY_DIR}/utils/zlib/libzlib.so
 # )
 add_subdirectory(zlib)
+find_package(zlib REQUIRED)
 #########################################################################
 add_library(gzstream SHARED
     gzstream/gzstream.h
     gzstream/gzstream.C
 )
-target_include_directories(gzstream PRIVATE 
-    gzstream
-    zlib
-    ${CMAKE_CURRENT_BINARY_DIR}/zlib
-)
-target_link_directories(gzstream PRIVATE 
-    ${CMAKE_CURRENT_BINARY_DIR}/zlib
-)
-if(MINGW)
-    target_link_libraries(gzstream PRIVATE  zlib1)
-else()
-    target_link_libraries(gzstream PRIVATE  z)
-endif()
+target_include_directories(gzstream PRIVATE gzstream)
+target_link_libraries(gzstream PRIVATE ZLIB::ZLIB)
 #########################################################################
 
 add_subdirectory(lvgl-libraries)
